@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Vocab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --ink: #1c1917;
+    --paper: #f7f3ee;
+    --surface: #fdfaf6;
+    --accent: #b45309;
+    --accent-light: #fef3c7;
+    --muted: #78716c;
+    --border: #e5e0d8;
+    --green: #166534;
+    --green-bg: #dcfce7;
+    --red: #991b1b;
+    --red-bg: #fee2e2;
+    --blue: #1e40af;
+    --blue-bg: #dbeafe;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 2rem 1.5rem 4rem;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  h1 { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
+
+  .tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; background: var(--surface); }
+  .tab { flex: 1; padding: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .tab.active { background: var(--ink); color: #fff; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 500; color: var(--ink); }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .progress-bar { height: 3px; background: var(--border); border-radius: 99px; margin-bottom: 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s ease; width: 0%; }
+
+  .card-area { margin-bottom: 1rem; }
+
+  .card-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    cursor: pointer;
+    min-height: 160px;
+  }
+
+  .front-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .card-word { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+  .card-pos { font-size: 12px; background: var(--accent-light); padding: 2px 10px; border-radius: 99px; color: var(--accent); display: inline-block; }
+  .flip-hint { font-size: 12px; color: var(--muted); margin-top: 16px; }
+
+  .back-label { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .def-zh { font-size: 17px; font-weight: 500; color: var(--ink); }
+  .def-en { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+  .example-text { font-family: 'Lora', serif; font-size: 13px; font-style: italic; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; }
+  .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  .pill { font-size: 12px; padding: 2px 10px; border-radius: 99px; border: 1px solid; }
+  .pill-syn { background: var(--green-bg); color: var(--green); border-color: #86efac; }
+  .pill-ant { background: var(--red-bg); color: var(--red); border-color: #fca5a5; }
+
+  .action-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+
+  .rating-row { display: none; gap: 8px; margin-bottom: 1.5rem; }
+  .rating-row.show { display: flex; }
+  .rate-btn { flex: 1; padding: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--surface); color: var(--ink); transition: all 0.15s; }
+  .rate-hard { color: var(--red); border-color: #fca5a5; }
+  .rate-hard:hover { background: var(--red); color: #fff; border-color: var(--red); }
+  .rate-ok { color: var(--accent); border-color: #fcd34d; }
+  .rate-ok:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .rate-easy { color: var(--green); border-color: #86efac; }
+  .rate-easy:hover { background: var(--green); color: #fff; border-color: var(--green); }
+
+  .done-state { display: none; text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .field input, .field textarea, .field select { width: 100%; padding: 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); outline: none; }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .btn { padding: 8px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: transparent; color: var(--ink); transition: all 0.15s; }
+  .btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .msg { font-size: 12px; margin-top: 8px; padding: 6px 10px; border-radius: 6px; }
+  .msg-ok { background: var(--green-bg); color: var(--green); }
+  .msg-err { background: var(--red-bg); color: var(--red); }
+
+  .word-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .word-item:last-child { border-bottom: none; }
+  .wi-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+  .wi-main { flex: 1; }
+  .wi-word { font-family: 'Lora', serif; font-weight: 600; font-size: 15px; }
+  .wi-def { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .wi-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .wi-pill { font-size: 11px; padding: 1px 7px; border-radius: 99px; border: 1px solid; }
+
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; margin-top: 2px; }
+  .tag-new { background: var(--blue-bg); color: var(--blue); }
+  .tag-hard { background: var(--red-bg); color: var(--red); }
+  .tag-ok { background: var(--accent-light); color: var(--accent); }
+  .tag-easy { background: var(--green-bg); color: var(--green); }
+
+  .del-btn { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); padding: 0 4px; line-height: 1; flex-shrink: 0; }
+  .del-btn:hover { color: var(--red); }
+
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>IELTS Vocab</h1>
+<p class="subtitle" id="sub">你的個人單字本</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('study')">複習</button>
+  <button class="tab" onclick="switchTab('add')">新增</button>
+  <button class="tab" onclick="switchTab('list')">單字表</button>
+</div>
+
+<!-- STUDY -->
+<div class="view active" id="view-study">
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="s-total">0</div><div class="stat-lbl">total</div></div>
+    <div class="stat"><div class="stat-num" id="s-due">0</div><div class="stat-lbl">due today</div></div>
+    <div class="stat"><div class="stat-num" id="s-easy">0</div><div class="stat-lbl">mastered</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+  <div class="done-state" id="done-state">✓ All done for today!<br><span style="font-size:12px;margin-top:6px;display:block;">Add more words or come back tomorrow.</span></div>
+
+  <div class="card-area" id="card-area">
+    <!-- front -->
+    <div class="card-panel front-panel" id="panel-front" onclick="flipCard()">
+      <div class="card-word" id="front-word"></div>
+      <div class="card-pos" id="front-pos"></div>
+      <div class="flip-hint">tap to reveal →</div>
+    </div>
+    <!-- back -->
+    <div class="card-panel" id="panel-back" style="display:none; cursor:default;">
+      <div class="back-label">意思</div>
+      <div class="def-zh" id="back-zh"></div>
+      <div class="def-en" id="back-en"></div>
+      <div class="divider"></div>
+      <div class="back-label">例句</div>
+      <div class="example-text" id="back-ex"></div>
+      <div id="syn-block">
+        <div class="divider"></div>
+        <div class="back-label">同義字 <span style="color:var(--green);">syn</span> · 反義字 <span style="color:var(--red);">ant</span></div>
+        <div class="pill-row" id="back-pills"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row" id="action-row">
+    <button class="btn" id="flip-btn" style="font-size:12px;padding:5px 14px;" onclick="flipCard()">Reveal →</button>
+  </div>
+
+  <div class="rating-row" id="rating-row">
+    <button class="rate-btn rate-hard" onclick="rate('hard')">😰 還不熟</button>
+    <button class="rate-btn rate-ok" onclick="rate('ok')">🤔 大概懂</button>
+    <button class="rate-btn rate-easy" onclick="rate('easy')">✓ 記住了</button>
+  </div>
+</div>
+
+<!-- ADD -->
+<div class="view" id="view-add">
+  <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <div class="field" style="flex:1;margin:0;">
+      <label>單字</label>
+      <input type="text" id="inp-word" placeholder="e.g. proliferate" />
+    </div>
+    <div class="field" style="flex:0 0 110px;margin:0;">
+      <label>詞性</label>
+      <select id="inp-pos">
+        <option value="v.">v. 動詞</option>
+        <option value="adj.">adj. 形容詞</option>
+        <option value="n.">n. 名詞</option>
+        <option value="adv.">adv. 副詞</option>
+        <option value="phr.">phr. 片語</option>
+      </select>
+    </div>
+  </div>
+  <div class="field"><label>中文解釋</label><input type="text" id="inp-zh" placeholder="按「AI 填入」自動生成，或自己輸入" /></div>
+  <div class="field"><label>英文解釋</label><input type="text" id="inp-en" placeholder="English definition" /></div>
+  <div class="field"><label>IELTS 例句</label><textarea id="inp-ex" placeholder="Example sentence in academic context"></textarea></div>
+  <div class="field">
+    <label>同義字 synonyms</label>
+    <input type="text" id="inp-syn" placeholder="e.g. expand, multiply, spread — 用逗號分隔" />
+    <div class="field-hint">IELTS 閱讀常用同義替換出題，這些也要一起背</div>
+  </div>
+  <div class="field"><label>反義字 antonyms</label><input type="text" id="inp-ant" placeholder="e.g. decline, diminish — 用逗號分隔（沒有可以留空）" /></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <button class="btn" id="btn-ai" onclick="aiGenerate()">✨ AI 填入</button>
+    <button class="btn btn-primary" onclick="addWord()">＋ 加入單字表</button>
+  </div>
+  <div id="add-msg"></div>
+</div>
+
+<!-- LIST -->
+<div class="view" id="view-list">
+  <div id="word-list"></div>
+</div>
+
+<script>
+const STORE = 'ielts_vocab_v3';
+
+const DEFAULTS = [
+  { id:1, word:'citing', pos:'v.', zh:'引用；列舉', en:'referring to something as evidence or justification', ex:'The researcher challenged the theory, citing several contradictory studies published in the past decade.', syn:['referencing','quoting','invoking'], ant:[], status:'new', next:Date.now() },
+  { id:2, word:'skeptical', pos:'adj.', zh:'持懷疑態度的', en:'not easily convinced; having doubts about something', ex:'Many economists remain skeptical about the long-term effectiveness of quantitative easing as a monetary policy tool.', syn:['doubtful','dubious','unconvinced'], ant:['credulous','convinced'], status:'new', next:Date.now() },
+  { id:3, word:'proliferate', pos:'v.', zh:'迅速增長；擴散', en:'to increase rapidly in number or amount', ex:'Social media platforms have proliferated rapidly, fundamentally altering how political information is consumed and shared.', syn:['multiply','expand','surge','spread'], ant:['decline','diminish','dwindle'], status:'new', next:Date.now() },
+  { id:1, word:'citing', pos:'v.', zh:'引用；列舉', en:'referring to something as evidence or justification', ex:'The researcher challenged the theory, citing several contradictory studies published in the past decade.', syn:['referencing','quoting','invoking'], ant:[], status:'new', next:Date.now() },
+  { id:2, word:'skeptical', pos:'adj.', zh:'持懷疑態度的', en:'not easily convinced; having doubts about something', ex:'Many economists remain skeptical about the long-term effectiveness of quantitative easing as a monetary policy tool.', syn:['doubtful','dubious','unconvinced'], ant:['credulous','convinced'], status:'new', next:Date.now() },
+  { id:3, word:'proliferate', pos:'v.', zh:'迅速增長；擴散', en:'to increase rapidly in number or amount', ex:'Social media platforms have proliferated rapidly, fundamentally altering how political information is consumed and shared.', syn:['multiply','expand','surge','spread'], ant:['decline','diminish','dwindle'], status:'new', next:Date.now() },
+  { id:4, word:'substantial', pos:'adj.', zh:'大量的；可觀的', en:'of considerable importance, size, or worth', ex:'There is substantial evidence to suggest that early intervention programmes improve long-term educational outcomes.', syn:['considerable','significant','extensive','sizeable'], ant:['negligible','minimal','trivial'], status:'new', next:Date.now() },
+  { id:5, word:'mutually exclusive', pos:'phr.', zh:'互相排斥的', en:'describing two things that cannot both be true or exist at the same time', ex:'Economic growth and environmental sustainability are not mutually exclusive goals, provided that appropriate policies are implemented.', syn:['incompatible','contradictory','irreconcilable'], ant:['compatible','complementary'], status:'new', next:Date.now() },
+  { id:6, word:'ill-equipped', pos:'adj.', zh:'準備不足的', en:'lacking the necessary skills, resources, or qualities to deal with something', ex:'Critics argue that many school leavers are ill-equipped for the demands of a rapidly changing labour market.', syn:['unprepared','unqualified','inadequate'], ant:['well-prepared','qualified','capable'], status:'new', next:Date.now() },
+  { id:7, word:'vocational', pos:'adj.', zh:'職業導向的', en:'relating to skills or qualifications needed for a particular job or career', ex:'Governments increasingly recognise that vocational training programmes can reduce youth unemployment more effectively than traditional academic routes.', syn:['occupational','technical','professional'], ant:['academic','theoretical'], status:'new', next:Date.now() },
+  { id:8, word:'undermine', pos:'v.', zh:'削弱；破壞', en:'to weaken or damage something gradually, especially an authority or belief', ex:'Widespread corruption can undermine public trust in democratic institutions and impede long-term economic development.', syn:['weaken','erode','compromise','subvert'], ant:['strengthen','bolster','reinforce'], status:'new', next:Date.now() },
+  { id:9, word:'inherently', pos:'adv.', zh:'本質上；天生地', en:'in a permanent, essential, or characteristic way', ex:'Some philosophers argue that human beings are inherently social creatures who cannot thrive in prolonged isolation.', syn:['fundamentally','intrinsically','essentially'], ant:['artificially','superficially'], status:'new', next:Date.now() },
+  { id:10, word:'embark on', pos:'phr.', zh:'開始；著手進行', en:'to begin a new project, journey, or course of action', ex:'Many developing nations are embarking on ambitious infrastructure programmes in order to attract foreign investment and stimulate economic growth.', syn:['undertake','commence','initiate'], ant:['abandon','conclude','cease'], status:'new', next:Date.now() },
+  { id:11, word:'consistent', pos:'adj.', zh:'一致的；持續的', en:'acting or done in the same way over time, or compatible with other facts or principles', ex:'Research indicates that consistent application of evidence-based teaching methods leads to measurably better student outcomes across diverse school settings.', syn:['steady','uniform','constant','coherent'], ant:['inconsistent','erratic','contradictory'], status:'new', next:Date.now() },
+  { id:12, word:'compromise', pos:'n./v.', zh:'妥協；折衷（方案）', en:'an agreement reached by each side making concessions, or to accept something less than ideal', ex:'Effective governance often requires politicians to compromise on certain policy details in order to build the broad coalitions necessary for legislative reform.', syn:['concession','middle ground','negotiate','settle'], ant:['deadlock','stand firm','refuse'], status:'new', next:Date.now() },
+  { id:13, word:'annotation', pos:'n.', zh:'注釋；標注', en:'a note added to a text or diagram to explain or comment on it', ex:'Scholars have long debated the authenticity of certain annotations found in the margins of the original manuscript, which may have been added by a later hand.', syn:['note','commentary','footnote','gloss'], ant:[], status:'new', next:Date.now() },
+  { id:14, word:'secularized', pos:'adj.', zh:'世俗化的', en:'having been converted from religious to non-religious character or use', ex:'As societies have become increasingly secularized, traditional religious institutions have had to adapt their role in public life.', syn:['non-religious','lay','temporal'], ant:['religious','sacred','spiritual'], status:'new', next:Date.now() },
+  { id:15, word:'census', pos:'n.', zh:'人口普查', en:'an official count or survey of a population, typically recording details of individuals', ex:'According to the most recent census, the proportion of elderly citizens has risen sharply, placing greater pressure on public pension systems.', syn:['survey','count','enumeration'], ant:[], status:'new', next:Date.now() },
+  { id:16, word:'coveted', pos:'adj.', zh:'令人垂涎的；夢寐以求的', en:'greatly desired or envied by others', ex:'A place at a top-ranked university remains one of the most coveted achievements among school leavers in many competitive societies.', syn:['desired','sought-after','prized','enviable'], ant:['undesirable','unwanted'], status:'new', next:Date.now() },
+  { id:17, word:'underlie', pos:'v.', zh:'構成…的基礎；潛藏於', en:'to be the cause or basis of something', ex:'A shared commitment to democratic values is said to underlie the foreign policy decisions of many Western governments.', syn:['form the basis of','underpin','drive','inform'], ant:[], status:'new', next:Date.now() },
+  { id:18, word:'profound', pos:'adj.', zh:'深刻的；深遠的', en:'having great depth, intensity, or far-reaching effects', ex:'The Industrial Revolution had a profound impact on social structures, fundamentally reshaping the relationship between labour and capital.', syn:['deep','far-reaching','significant','intense'], ant:['superficial','trivial','shallow'], status:'new', next:Date.now() },
+  { id:19, word:'surrender', pos:'v./n.', zh:'放棄；投降', en:'to give up something or yield to the power of another', ex:'Critics argue that excessive reliance on international aid may cause governments to surrender control over their own economic policy-making.', syn:['yield','relinquish','concede','give up'], ant:['resist','retain','hold on'], status:'new', next:Date.now() },
+  { id:20, word:'restore', pos:'v.', zh:'恢復；重建', en:'to bring back or return something to a former condition or position', ex:'Policymakers face the challenge of restoring public confidence in financial institutions following the banking crisis.', syn:['reinstate','revive','rehabilitate','rebuild'], ant:['destroy','undermine','abolish'], status:'new', next:Date.now() },
+  { id:21, word:'fraction', pos:'n.', zh:'一小部分；分數', en:'a small part or proportion of something', ex:'Only a fraction of the funding allocated to renewable energy research is directed towards solar technology in developing regions.', syn:['portion','fragment','small part','segment'], ant:['whole','entirety','majority'], status:'new', next:Date.now() },
+  { id:22, word:'abundant', pos:'adj.', zh:'豐富的；充裕的', en:'existing or available in large quantities', ex:'The region is abundant in natural resources, yet persistent inequality suggests that wealth is not being equitably distributed among the population.', syn:['plentiful','ample','copious','rich in'], ant:['scarce','limited','deficient'], status:'new', next:Date.now() },
+  { id:23, word:'deterioration', pos:'n.', zh:'惡化；退化', en:'the process of becoming progressively worse', ex:'Prolonged exposure to air pollution has been linked to the deterioration of respiratory health in urban populations worldwide.', syn:['decline','degradation','worsening','decay'], ant:['improvement','recovery','enhancement'], status:'new', next:Date.now() },
+  { id:24, word:'arise', pos:'v.', zh:'出現；產生', en:'to emerge or occur, especially as a result of something', ex:'Ethical dilemmas frequently arise when scientific advancement outpaces the development of appropriate regulatory frameworks.', syn:['emerge','occur','develop','come about'], ant:['disappear','cease','resolve'], status:'new', next:Date.now() },
+  { id:25, word:'promptly', pos:'adv.', zh:'迅速地；立即地', en:'with little or no delay; immediately', ex:'Governments that respond promptly to early warning signs of economic instability are generally better positioned to avert financial crises.', syn:['immediately','swiftly','without delay','rapidly'], ant:['slowly','belatedly','eventually'], status:'new', next:Date.now() },
+  { id:26, word:'confined', pos:'adj.', zh:'受限的；侷限的', en:'restricted to a particular place, situation, or group', ex:'Access to high-quality legal representation should not be confined to those with substantial financial means.', syn:['restricted','limited','contained','bound'], ant:['unrestricted','open','widespread'], status:'new', next:Date.now() },
+  { id:27, word:'rollout', pos:'n.', zh:'推出；部署', en:'the staged introduction or launch of a new product, service, or policy', ex:'The rollout of the national vaccination programme was hampered by logistical challenges and uneven distribution of resources across regions.', syn:['launch','introduction','deployment','implementation'], ant:['withdrawal','cancellation'], status:'new', next:Date.now() },
+  { id:28, word:'caught in the middle', pos:'phr.', zh:'夾在中間；左右為難', en:'placed in a difficult position between two opposing sides or demands', ex:'Small nations are frequently caught in the middle of geopolitical rivalries between major powers, forcing difficult diplomatic trade-offs.', syn:['torn between','stuck between','caught between two sides'], ant:[], status:'new', next:Date.now() },
+  { id:29, word:'impunity', pos:'n.', zh:'免受懲罰；不受法律制裁', en:'exemption from punishment or freedom from the injurious consequences of an action', ex:'Human rights organisations have warned that powerful corporations operating with impunity in conflict zones must be held accountable under international law.', syn:['exemption','immunity','freedom from punishment'], ant:['accountability','liability','consequence'], status:'new', next:Date.now() },
+];
+
+let words = [], queue = [], idx = 0, done = 0, flipped = false;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) { words = JSON.parse(raw); words.forEach(w => { if(!w.syn) w.syn=[]; if(!w.ant) w.ant=[]; }); }
+    else words = DEFAULTS;
+  } catch(e) { words = DEFAULTS; }
+}
+
+function save() { try { localStorage.setItem(STORE, JSON.stringify(words)); } catch(e) {} }
+function getNextId() { return words.length ? Math.max(...words.map(w=>w.id))+1 : 1; }
+function getDue() { return words.filter(w => w.next <= Date.now()); }
+
+const SESSION_STORE = 'ielts_session_v1';
+const TODAY = new Date().toDateString();
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function saveSession() {
+  try {
+    localStorage.setItem(SESSION_STORE, JSON.stringify({
+      date: TODAY, queueIds: queue.map(w => w.id), idx, done
+    }));
+  } catch(e) {}
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_STORE);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (s.date !== TODAY) return null;
+    return s;
+  } catch(e) { return null; }
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = words.length;
+  document.getElementById('s-due').textContent = getDue().length;
+  document.getElementById('s-easy').textContent = words.filter(w=>w.status==='easy').length;
+}
+
+function initStudy() {
+  flipped = false;
+  const session = loadSession();
+  const due = getDue();
+
+  if (session && session.queueIds) {
+    const idMap = Object.fromEntries(words.map(w => [w.id, w]));
+    const restored = session.queueIds.map(id => idMap[id]).filter(Boolean);
+    const sessionIdSet = new Set(session.queueIds);
+    const newDue = due.filter(w => !sessionIdSet.has(w.id));
+    queue = [...restored, ...shuffle(newDue)];
+    idx = session.idx;
+    done = session.done;
+  } else {
+    const priority = (w) => w.status === 'hard' ? 0 : w.status === 'new' ? 1 : 2;
+    const groups = [0, 1, 2].map(p => shuffle(due.filter(w => priority(w) === p)));
+    queue = groups.flat();
+    idx = 0; done = 0;
+    saveSession();
+  }
+
+  updateStats(); showCard();
+}
+
+function showCard() {
+  const total = queue.length + done;
+  document.getElementById('prog').style.width = total ? Math.round((done/total)*100)+'%' : '0%';
+
+  if (idx >= queue.length) {
+    document.getElementById('card-area').style.display = 'none';
+    document.getElementById('action-row').style.display = 'none';
+    document.getElementById('rating-row').classList.remove('show');
+    document.getElementById('done-state').style.display = 'block';
+    document.getElementById('prog').style.width = '100%';
+    return;
+  }
+
+  document.getElementById('card-area').style.display = 'block';
+  document.getElementById('action-row').style.display = 'flex';
+  document.getElementById('done-state').style.display = 'none';
+
+  const w = queue[idx];
+  document.getElementById('front-word').textContent = w.word;
+  document.getElementById('front-pos').textContent = w.pos;
+  document.getElementById('back-zh').textContent = w.zh;
+  document.getElementById('back-en').textContent = w.en;
+  document.getElementById('back-ex').textContent = '"' + w.ex + '"';
+
+  const hasPills = (w.syn && w.syn.length) || (w.ant && w.ant.length);
+  document.getElementById('syn-block').style.display = hasPills ? 'block' : 'none';
+  const pillRow = document.getElementById('back-pills');
+  pillRow.innerHTML = '';
+  (w.syn||[]).forEach(s => { const p = document.createElement('span'); p.className='pill pill-syn'; p.textContent='≈ '+s; pillRow.appendChild(p); });
+  (w.ant||[]).forEach(a => { const p = document.createElement('span'); p.className='pill pill-ant'; p.textContent='↔ '+a; pillRow.appendChild(p); });
+
+  document.getElementById('panel-front').style.display = 'flex';
+  document.getElementById('panel-back').style.display = 'none';
+  document.getElementById('rating-row').classList.remove('show');
+  const fb = document.getElementById('flip-btn');
+  fb.textContent = 'Reveal →';
+  fb.disabled = false;
+  flipped = false;
+}
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  document.getElementById('panel-front').style.display = 'none';
+  document.getElementById('panel-back').style.display = 'block';
+  document.getElementById('rating-row').classList.add('show');
+  const fb = document.getElementById('flip-btn');
+  fb.textContent = '已翻面';
+  fb.disabled = true;
+}
+
+function rate(r) {
+  const w = queue[idx];
+  const wi = words.findIndex(x => x.id === w.id);
+  if (wi === -1) return;
+  words[wi].status = r;
+  const day = 86400000;
+  words[wi].next = Date.now() + ({hard:day, ok:3*day, easy:7*day})[r];
+  save(); done++; idx++;
+  saveSession();
+  updateStats(); showCard();
+}
+
+async function aiGenerate() {
+  const word = document.getElementById('inp-word').value.trim();
+  if (!word) { showMsg('請先輸入單字', true); return; }
+  const btn = document.getElementById('btn-ai');
+  btn.disabled = true; btn.textContent = '生成中…';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'You are an IELTS vocabulary expert. When given a word, respond ONLY with a JSON object (no markdown, no backticks, no extra text) with these exact keys: zh (Chinese meaning, concise ≤8 chars), en (English definition, 1 sentence), ex (IELTS academic example sentence, 20-30 words), syn (array of 2-4 synonyms commonly used in IELTS reading passages), ant (array of 1-3 antonyms, or empty array if none relevant).',
+        messages: [{ role: 'user', content: word }]
+      })
+    });
+    const data = await res.json();
+    const parsed = JSON.parse(data.content?.[0]?.text || '{}');
+    document.getElementById('inp-zh').value = parsed.zh || '';
+    document.getElementById('inp-en').value = parsed.en || '';
+    document.getElementById('inp-ex').value = parsed.ex || '';
+    document.getElementById('inp-syn').value = (parsed.syn||[]).join(', ');
+    document.getElementById('inp-ant').value = (parsed.ant||[]).join(', ');
+  } catch(e) { showMsg('AI 生成失敗，請手動填入', true); }
+  btn.disabled = false; btn.textContent = '✨ AI 填入';
+}
+
+function parsePills(str) { return str.split(',').map(s=>s.trim()).filter(Boolean); }
+
+function addWord() {
+  const word = document.getElementById('inp-word').value.trim();
+  const pos = document.getElementById('inp-pos').value;
+  const zh = document.getElementById('inp-zh').value.trim();
+  const en = document.getElementById('inp-en').value.trim();
+  const ex = document.getElementById('inp-ex').value.trim();
+  const syn = parsePills(document.getElementById('inp-syn').value);
+  const ant = parsePills(document.getElementById('inp-ant').value);
+  if (!word || !zh) { showMsg('請填寫單字和中文解釋', true); return; }
+  if (words.find(w=>w.word.toLowerCase()===word.toLowerCase())) { showMsg('這個字已經在單字表裡了', true); return; }
+  words.push({ id:getNextId(), word, pos, zh, en, ex, syn, ant, status:'new', next:Date.now() });
+  save();
+  showMsg('✓ 已加入單字表！', false);
+  ['inp-word','inp-zh','inp-en','inp-ex','inp-syn','inp-ant'].forEach(id => document.getElementById(id).value='');
+  updateStats();
+}
+
+function showMsg(text, isErr) {
+  const el = document.getElementById('add-msg');
+  el.textContent = text;
+  el.className = 'msg '+(isErr?'msg-err':'msg-ok');
+  setTimeout(()=>{ el.textContent=''; el.className=''; }, 3000);
+}
+
+function renderList() {
+  const el = document.getElementById('word-list');
+  if (!words.length) { el.innerHTML='<div class="empty">還沒有單字，去「新增」加入吧！</div>'; return; }
+  const tagMap = { new:['tag-new','new'], hard:['tag-hard','hard'], ok:['tag-ok','ok'], easy:['tag-easy','easy'] };
+  el.innerHTML = words.map(w => {
+    const [cls, lbl] = tagMap[w.status] || tagMap.new;
+    const synHtml = (w.syn||[]).map(s=>`<span class="wi-pill pill-syn" style="background:var(--green-bg);color:var(--green);border-color:#86efac;">≈ ${s}</span>`).join('');
+    const antHtml = (w.ant||[]).map(a=>`<span class="wi-pill pill-ant" style="background:var(--red-bg);color:var(--red);border-color:#fca5a5;">↔ ${a}</span>`).join('');
+    return `<div class="word-item">
+      <div class="wi-top">
+        <div class="wi-main">
+          <div class="wi-word">${w.word} <span style="font-size:11px;color:var(--muted);font-weight:400;">${w.pos}</span></div>
+          <div class="wi-def">${w.zh}</div>
+        </div>
+        <span class="tag ${cls}">${lbl}</span>
+        <button class="del-btn" onclick="delWord(${w.id})" title="刪除">×</button>
+      </div>
+      ${(synHtml||antHtml)?`<div class="wi-pills">${synHtml}${antHtml}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function delWord(id) {
+  if (!confirm('確定刪除這個字？')) return;
+  words = words.filter(w=>w.id!==id);
+  save(); renderList(); updateStats();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['study','add','list'][i]===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if (name==='list') renderList();
+  if (name==='study') initStudy();
+}
+
+load();
+initStudy();
+document.getElementById('sub').textContent = `${words.length} 個單字 · ${getDue().length} 個待複習`;
+</script>
+</body>
+</html>
