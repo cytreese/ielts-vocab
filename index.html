@@ -277,16 +277,7 @@
     <div id="add-msg" style="margin-top:8px;"></div>
   </div>
 
-  <div class="apikey-section">
-    <div class="field" style="margin-bottom:8px;">
-      <label>🔑 Anthropic API Key（用於 AI 補齊）</label>
-      <div class="apikey-row">
-        <input class="apikey-input" type="password" id="inp-apikey" placeholder="sk-ant-..." />
-        <button class="btn" onclick="saveApiKey()">儲存</button>
-      </div>
-      <div class="apikey-status" id="apikey-status"></div>
-    </div>
-  </div>
+
 </div>
 
 <!-- LIST -->
@@ -358,16 +349,12 @@ function shuffle(arr) {
 // ── Batch add with preview ───────────────────────────────
 let pendingWords = []; // words ready to confirm
 
+const PROXY_URL = 'https://ielts-proxy.cytreese.workers.dev';
+
 async function fetchWordData(word) {
-  const apiKey = getApiKey();
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(PROXY_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
@@ -376,7 +363,6 @@ async function fetchWordData(word) {
     })
   });
   const data = await res.json();
-  console.log('API response for', word, ':', JSON.stringify(data));
   if (data.error) throw new Error(data.error.message || 'API error');
   if (!data.content || !data.content[0]) throw new Error('Empty response');
   const text = data.content[0].text.trim().replace(/^```json|^```|```$/gm, '').trim();
@@ -650,7 +636,6 @@ function switchTab(name) {
 
 load();
 initStudy();
-initApiKeyUI();
 document.getElementById('sub').textContent = `${words.length} 個單字 · ${getDue().length} 個待複習`;
 </script>
 </body>
