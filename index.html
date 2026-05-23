@@ -356,7 +356,7 @@ async function fetchWordData(word) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 1000,
       system: 'You are an IELTS vocabulary expert. When given a word, respond ONLY with a JSON object (no markdown, no backticks, no extra text) with these exact keys: zh (Chinese meaning, concise ≤8 chars), en (English definition, 1 sentence), ex (IELTS academic example sentence, 20-30 words), syn (array of 2-4 synonyms commonly used in IELTS reading passages), ant (array of 1-3 antonyms, or empty array if none relevant), pos (part of speech: one of v. / adj. / n. / adv. / phr.).',
       messages: [{ role: 'user', content: word }]
