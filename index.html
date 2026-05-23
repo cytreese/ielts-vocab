@@ -166,14 +166,14 @@
 <div class="streak-bar">
   <div class="streak-fire" id="streak-icon">✨</div>
   <div class="streak-info">
-    <div class="streak-num" id="streak-num">0</div>
-    <div class="streak-lbl">連續練習天數</div>
+    <div class="streak-num" id="streak-num">0</span> Days</div>
+    <div class="streak-lbl">🔥Streak🔥</div>
   </div>
-  <div class="streak-flips">今日翻牌<br><span id="flips-today">0</span> 次</div>
+  <div class="streak-flips">Flips<br><span id="flips-today">0</span> Times</div>
 </div>
 <div class="tabs">
   <button class="tab active" onclick="switchTab('study')">複習</button>
-  <button class="tab" onclick="switchTab('add')">新增</button>
+  <button class="tab" onclick="switchTab('add')">Add</button>
   <button class="tab" onclick="switchTab('list')">單字表</button>
 </div>
 <!-- STUDY -->
@@ -225,7 +225,7 @@
       <textarea id="inp-words" rows="5" placeholder="proliferate&#10;derives&#10;undermining&#10;..."></textarea>
       <div class="field-hint">AI 會自動還原為字典原型・重複的字會自動略過</div>
     </div>
-    <button class="btn btn-primary" id="btn-generate" onclick="generatePreview()">✨ AI 產出</button>
+    <button class="btn btn-primary" id="btn-generate" onclick="generatePreview()">✨ AI Generate</button>
     <div class="batch-progress" id="batch-progress" style="display:none;">
       <div class="batch-progress-bar"><div class="batch-progress-fill" id="batch-fill"></div></div>
       <div class="batch-status" id="batch-status"></div>
@@ -390,7 +390,7 @@ async function generatePreview() {
   for (let i = 0; i < inputWords.length; i++) {
     const inputWord = inputWords[i];
     fill.style.width = Math.round(((i) / inputWords.length) * 100) + '%';
-    status.textContent = `AI 產出中 ${i+1} / ${inputWords.length}：${inputWord}`;
+    status.textContent = `AI Generating ${i+1} / ${inputWords.length}：${inputWord}`;
 
     // Quick pre-check: if the user typed exactly a word already in vocab, skip without API call
     if (existingInVocab.has(inputWord.toLowerCase())) {
