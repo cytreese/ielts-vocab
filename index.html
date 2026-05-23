@@ -21,6 +21,8 @@
     --red-bg: #fee2e2;
     --blue: #1e40af;
     --blue-bg: #dbeafe;
+    --orange: #c2410c;
+    --orange-bg: #ffedd5;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,6 +39,20 @@
 
   h1 { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
   .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
+
+
+  /* Streak bar */
+  .streak-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 1.5rem;
+  }
+  .streak-fire { font-size: 22px; line-height: 1; }
+  .streak-info { flex: 1; }
+  .streak-num { font-size: 18px; font-weight: 600; color: var(--orange); line-height: 1; }
+  .streak-lbl { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .streak-flips { font-size: 12px; color: var(--muted); text-align: right; }
+  .streak-flips span { font-weight: 600; color: var(--ink); }
 
   .tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; background: var(--surface); }
   .tab { flex: 1; padding: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; cursor: pointer; color: var(--muted); transition: all 0.15s; }
@@ -65,18 +81,18 @@
   }
 
   .front-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-  .card-word { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+  .card-word { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
   .card-pos { font-size: 12px; background: var(--accent-light); padding: 2px 10px; border-radius: 99px; color: var(--accent); display: inline-block; }
   .flip-hint { font-size: 12px; color: var(--muted); margin-top: 16px; }
 
-  .back-label { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-  .def-zh { font-size: 17px; font-weight: 500; color: var(--ink); }
-  .def-en { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
-  .example-text { font-family: 'Lora', serif; font-size: 13px; font-style: italic; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; }
+  .back-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .def-zh { font-size: 20px; font-weight: 500; color: var(--ink); }
+  .def-en { font-size: 15px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+  .example-text { font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; }
   .divider { height: 1px; background: var(--border); margin: 12px 0; }
 
   .pill-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
-  .pill { font-size: 12px; padding: 2px 10px; border-radius: 99px; border: 1px solid; }
+  .pill { font-size: 13px; padding: 3px 11px; border-radius: 99px; border: 1px solid; }
   .pill-syn { background: var(--green-bg); color: var(--green); border-color: #86efac; }
   .pill-ant { background: var(--red-bg); color: var(--red); border-color: #fca5a5; }
 
@@ -129,6 +145,13 @@
   .del-btn { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); padding: 0 4px; line-height: 1; flex-shrink: 0; }
   .del-btn:hover { color: var(--red); }
 
+
+  .apikey-section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .apikey-row { display: flex; gap: 8px; align-items: center; }
+  .apikey-input { flex: 1; padding: 7px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); outline: none; }
+  .apikey-input:focus { border-color: var(--accent); }
+  .apikey-status { font-size: 11px; margin-top: 5px; color: var(--muted); }
+
   .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
 </style>
 </head>
@@ -136,6 +159,16 @@
 
 <h1>IELTS Vocab</h1>
 <p class="subtitle" id="sub">你的個人單字本</p>
+
+<!-- Streak Bar -->
+<div class="streak-bar">
+  <div class="streak-fire" id="streak-icon">✨</div>
+  <div class="streak-info">
+    <div class="streak-num" id="streak-num">0</div>
+    <div class="streak-lbl">連續練習天數</div>
+  </div>
+  <div class="streak-flips">今日翻牌<br><span id="flips-today">0</span> 次</div>
+</div>
 
 <div class="tabs">
   <button class="tab active" onclick="switchTab('study')">複習</button>
@@ -219,6 +252,16 @@
     <button class="btn btn-primary" onclick="addWord()">＋ 加入單字表</button>
   </div>
   <div id="add-msg"></div>
+  <div class="apikey-section">
+    <div class="field" style="margin-bottom:8px;">
+      <label>🔑 Anthropic API Key（用於 AI 填入）</label>
+      <div class="apikey-row">
+        <input class="apikey-input" type="password" id="inp-apikey" placeholder="sk-ant-..." />
+        <button class="btn" onclick="saveApiKey()">儲存</button>
+      </div>
+      <div class="apikey-status" id="apikey-status"></div>
+    </div>
+  </div>
 </div>
 
 <!-- LIST -->
@@ -228,11 +271,66 @@
 
 <script>
 const STORE = 'ielts_vocab_v3';
+const SESSION_STORE = 'ielts_session_v1';
+const STREAK_STORE = 'ielts_streak_v1';
+const APIKEY_STORE = 'ielts_apikey_v1';
+const TODAY = new Date().toDateString();
+
+// ── API Key ─────────────────────────────────────────────
+function getApiKey() { return localStorage.getItem(APIKEY_STORE) || ''; }
+function saveApiKey() {
+  const key = document.getElementById('inp-apikey').value.trim();
+  if (!key) { setApiKeyStatus('請輸入 API Key', true); return; }
+  localStorage.setItem(APIKEY_STORE, key);
+  document.getElementById('inp-apikey').value = '';
+  setApiKeyStatus('✓ 已儲存', false);
+}
+function setApiKeyStatus(msg, isErr) {
+  const el = document.getElementById('apikey-status');
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--red)' : 'var(--green)';
+}
+function initApiKeyUI() {
+  const key = getApiKey();
+  setApiKeyStatus(key ? '✓ API Key 已設定' : '尚未設定，AI 填入功能無法使用', !key);
+}
+
+// ── Streak ──────────────────────────────────────────────
+function loadStreak() {
+  try { return JSON.parse(localStorage.getItem(STREAK_STORE)) || {}; } catch(e) { return {}; }
+}
+function saveStreak(s) { try { localStorage.setItem(STREAK_STORE, JSON.stringify(s)); } catch(e) {} }
+function getStreakData() {
+  const s = loadStreak();
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = yesterday.toDateString();
+  if (s.lastDay === TODAY) { /* already updated */ }
+  else if (s.lastDay === yStr) { s.streak = (s.streak||0)+1; s.lastDay=TODAY; s.flipsToday=0; saveStreak(s); }
+  else { s.streak=1; s.lastDay=TODAY; s.flipsToday=0; saveStreak(s); }
+  return s;
+}
+function recordFlip() {
+  const s = loadStreak(); s.flipsToday=(s.flipsToday||0)+1; saveStreak(s); updateStreakUI();
+}
+function updateStreakUI() {
+  const s = loadStreak(); const streak = s.streak||0;
+  document.getElementById('streak-num').textContent = streak;
+  document.getElementById('flips-today').textContent = s.flipsToday||0;
+  document.getElementById('streak-icon').textContent = streak>=7?'🔥':streak>=3?'⚡':'✨';
+}
+
+// ── Session persistence ─────────────────────────────────
+function saveSession() {
+  try { localStorage.setItem(SESSION_STORE, JSON.stringify({date:TODAY,queueIds:queue.map(w=>w.id),idx,done})); } catch(e) {}
+}
+function loadSession() {
+  try { const s=JSON.parse(localStorage.getItem(SESSION_STORE)||'null'); return s&&s.date===TODAY?s:null; } catch(e){return null;}
+}
+function shuffle(arr) {
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
 
 const DEFAULTS = [
-  { id:1, word:'citing', pos:'v.', zh:'引用；列舉', en:'referring to something as evidence or justification', ex:'The researcher challenged the theory, citing several contradictory studies published in the past decade.', syn:['referencing','quoting','invoking'], ant:[], status:'new', next:Date.now() },
-  { id:2, word:'skeptical', pos:'adj.', zh:'持懷疑態度的', en:'not easily convinced; having doubts about something', ex:'Many economists remain skeptical about the long-term effectiveness of quantitative easing as a monetary policy tool.', syn:['doubtful','dubious','unconvinced'], ant:['credulous','convinced'], status:'new', next:Date.now() },
-  { id:3, word:'proliferate', pos:'v.', zh:'迅速增長；擴散', en:'to increase rapidly in number or amount', ex:'Social media platforms have proliferated rapidly, fundamentally altering how political information is consumed and shared.', syn:['multiply','expand','surge','spread'], ant:['decline','diminish','dwindle'], status:'new', next:Date.now() },
   { id:1, word:'citing', pos:'v.', zh:'引用；列舉', en:'referring to something as evidence or justification', ex:'The researcher challenged the theory, citing several contradictory studies published in the past decade.', syn:['referencing','quoting','invoking'], ant:[], status:'new', next:Date.now() },
   { id:2, word:'skeptical', pos:'adj.', zh:'持懷疑態度的', en:'not easily convinced; having doubts about something', ex:'Many economists remain skeptical about the long-term effectiveness of quantitative easing as a monetary policy tool.', syn:['doubtful','dubious','unconvinced'], ant:['credulous','convinced'], status:'new', next:Date.now() },
   { id:3, word:'proliferate', pos:'v.', zh:'迅速增長；擴散', en:'to increase rapidly in number or amount', ex:'Social media platforms have proliferated rapidly, fundamentally altering how political information is consumed and shared.', syn:['multiply','expand','surge','spread'], ant:['decline','diminish','dwindle'], status:'new', next:Date.now() },
@@ -262,6 +360,12 @@ const DEFAULTS = [
   { id:27, word:'rollout', pos:'n.', zh:'推出；部署', en:'the staged introduction or launch of a new product, service, or policy', ex:'The rollout of the national vaccination programme was hampered by logistical challenges and uneven distribution of resources across regions.', syn:['launch','introduction','deployment','implementation'], ant:['withdrawal','cancellation'], status:'new', next:Date.now() },
   { id:28, word:'caught in the middle', pos:'phr.', zh:'夾在中間；左右為難', en:'placed in a difficult position between two opposing sides or demands', ex:'Small nations are frequently caught in the middle of geopolitical rivalries between major powers, forcing difficult diplomatic trade-offs.', syn:['torn between','stuck between','caught between two sides'], ant:[], status:'new', next:Date.now() },
   { id:29, word:'impunity', pos:'n.', zh:'免受懲罰；不受法律制裁', en:'exemption from punishment or freedom from the injurious consequences of an action', ex:'Human rights organisations have warned that powerful corporations operating with impunity in conflict zones must be held accountable under international law.', syn:['exemption','immunity','freedom from punishment'], ant:['accountability','liability','consequence'], status:'new', next:Date.now() },
+  { id:30, word:'aftermath', pos:'n.', zh:'後果；餘波', en:'the consequences or after-effects of a significant, often unpleasant, event', ex:'In the aftermath of the financial crisis, governments worldwide implemented sweeping regulatory reforms to prevent a recurrence of systemic failure.', syn:['consequences','repercussions','fallout','after-effects'], ant:['prelude','cause','origin'], status:'new', next:Date.now() },
+  { id:31, word:'pawning', pos:'v.', zh:'典當；抵押', en:'depositing an object with a pawnbroker as security for a loan', ex:'Rising levels of household debt have led to an increase in the number of individuals pawning personal valuables in order to meet immediate financial obligations.', syn:['pledging','mortgaging','hocking'], ant:['redeeming','reclaiming'], status:'new', next:Date.now() },
+  { id:32, word:'sentiments', pos:'n.', zh:'情感；看法；情緒', en:'feelings or opinions, especially those expressed publicly', ex:'Public sentiments towards immigration policy have shifted considerably in response to changing economic conditions and media coverage.', syn:['feelings','views','opinions','attitudes'], ant:[], status:'new', next:Date.now() },
+  { id:33, word:'romanticize', pos:'v.', zh:'浪漫化；美化', en:'to think about or describe something as being better or more appealing than it really is', ex:'It is tempting to romanticize pre-industrial societies, yet historical evidence suggests that poverty and disease were far more prevalent than modern nostalgia implies.', syn:['idealise','glamorise','glorify'], ant:['disparage','demystify'], status:'new', next:Date.now() },
+  { id:34, word:'bygone', pos:'adj.', zh:'過去的；往昔的', en:'belonging to an earlier time; past', ex:'Many politicians invoke a bygone era of national unity, though historians caution against oversimplifying the complexities of the past.', syn:['past','former','olden','previous'], ant:['current','present','modern'], status:'new', next:Date.now() },
+  { id:35, word:'assimilation', pos:'n.', zh:'同化；融入', en:'the process by which a person or group adopts the culture and norms of a larger society', ex:'Debates over cultural assimilation raise fundamental questions about the extent to which immigrant communities should be expected to abandon their heritage.', syn:['integration','absorption','acculturation'], ant:['segregation','exclusion','preservation'], status:'new', next:Date.now() },
 ];
 
 let words = [], queue = [], idx = 0, done = 0, flipped = false;
@@ -278,36 +382,6 @@ function save() { try { localStorage.setItem(STORE, JSON.stringify(words)); } ca
 function getNextId() { return words.length ? Math.max(...words.map(w=>w.id))+1 : 1; }
 function getDue() { return words.filter(w => w.next <= Date.now()); }
 
-const SESSION_STORE = 'ielts_session_v1';
-const TODAY = new Date().toDateString();
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function saveSession() {
-  try {
-    localStorage.setItem(SESSION_STORE, JSON.stringify({
-      date: TODAY, queueIds: queue.map(w => w.id), idx, done
-    }));
-  } catch(e) {}
-}
-
-function loadSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_STORE);
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    if (s.date !== TODAY) return null;
-    return s;
-  } catch(e) { return null; }
-}
-
 function updateStats() {
   document.getElementById('s-total').textContent = words.length;
   document.getElementById('s-due').textContent = getDue().length;
@@ -315,26 +389,19 @@ function updateStats() {
 }
 
 function initStudy() {
-  flipped = false;
-  const session = loadSession();
-  const due = getDue();
-
+  flipped = false; getStreakData(); updateStreakUI();
+  const session = loadSession(); const due = getDue();
   if (session && session.queueIds) {
-    const idMap = Object.fromEntries(words.map(w => [w.id, w]));
-    const restored = session.queueIds.map(id => idMap[id]).filter(Boolean);
-    const sessionIdSet = new Set(session.queueIds);
-    const newDue = due.filter(w => !sessionIdSet.has(w.id));
-    queue = [...restored, ...shuffle(newDue)];
-    idx = session.idx;
-    done = session.done;
+    const idMap = Object.fromEntries(words.map(w=>[w.id,w]));
+    const restored = session.queueIds.map(id=>idMap[id]).filter(Boolean);
+    const seen = new Set(session.queueIds);
+    queue = [...restored, ...shuffle(due.filter(w=>!seen.has(w.id)))];
+    idx=session.idx; done=session.done;
   } else {
-    const priority = (w) => w.status === 'hard' ? 0 : w.status === 'new' ? 1 : 2;
-    const groups = [0, 1, 2].map(p => shuffle(due.filter(w => priority(w) === p)));
-    queue = groups.flat();
-    idx = 0; done = 0;
-    saveSession();
+    const pri=(w)=>w.status==='hard'?0:w.status==='new'?1:2;
+    queue=[0,1,2].flatMap(p=>shuffle(due.filter(w=>pri(w)===p)));
+    idx=0; done=0; saveSession();
   }
-
   updateStats(); showCard();
 }
 
@@ -381,6 +448,7 @@ function showCard() {
 function flipCard() {
   if (flipped) return;
   flipped = true;
+  recordFlip();
   document.getElementById('panel-front').style.display = 'none';
   document.getElementById('panel-back').style.display = 'block';
   document.getElementById('rating-row').classList.add('show');
@@ -407,9 +475,11 @@ async function aiGenerate() {
   const btn = document.getElementById('btn-ai');
   btn.disabled = true; btn.textContent = '生成中…';
   try {
+    const apiKey = getApiKey();
+    if (!apiKey) { showMsg('請先在下方設定 Anthropic API Key', true); btn.disabled=false; btn.textContent='✨ AI 填入'; return; }
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -492,6 +562,7 @@ function switchTab(name) {
 
 load();
 initStudy();
+initApiKeyUI();
 document.getElementById('sub').textContent = `${words.length} 個單字 · ${getDue().length} 個待複習`;
 </script>
 </body>
