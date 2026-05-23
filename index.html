@@ -54,6 +54,25 @@
   .streak-flips { font-size: 12px; color: var(--muted); text-align: right; }
   .streak-flips span { font-weight: 600; color: var(--ink); }
 
+  /* Batch add */
+  .batch-progress { margin-top: 12px; display: none; }
+  .batch-progress-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+  .batch-progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s ease; width: 0%; }
+  .batch-status { font-size: 12px; color: var(--muted); }
+  .batch-result { margin-top: 10px; font-size: 12px; }
+  .batch-result-item { padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; gap: 6px; align-items: center; }
+  .batch-result-item:last-child { border-bottom: none; }
+  .batch-ok { color: var(--green); }
+  .batch-skip { color: var(--muted); }
+  .batch-err { color: var(--red); }
+
+  /* API key */
+  .apikey-section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .apikey-row { display: flex; gap: 8px; align-items: center; }
+  .apikey-input { flex: 1; padding: 7px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); outline: none; }
+  .apikey-input:focus { border-color: var(--accent); }
+  .apikey-status { font-size: 11px; margin-top: 5px; color: var(--muted); }
+
   .tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; background: var(--surface); }
   .tab { flex: 1; padding: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; cursor: pointer; color: var(--muted); transition: all 0.15s; }
   .tab.active { background: var(--ink); color: #fff; }
@@ -145,14 +164,7 @@
   .del-btn { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); padding: 0 4px; line-height: 1; flex-shrink: 0; }
   .del-btn:hover { color: var(--red); }
 
-
-  .apikey-section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-  .apikey-row { display: flex; gap: 8px; align-items: center; }
-  .apikey-input { flex: 1; padding: 7px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); outline: none; }
-  .apikey-input:focus { border-color: var(--accent); }
-  .apikey-status { font-size: 11px; margin-top: 5px; color: var(--muted); }
-
-  .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+ text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
 </style>
 </head>
 <body>
@@ -222,39 +234,22 @@
 
 <!-- ADD -->
 <div class="view" id="view-add">
-  <div style="display:flex;gap:8px;margin-bottom:14px;">
-    <div class="field" style="flex:1;margin:0;">
-      <label>單字</label>
-      <input type="text" id="inp-word" placeholder="e.g. proliferate" />
-    </div>
-    <div class="field" style="flex:0 0 110px;margin:0;">
-      <label>詞性</label>
-      <select id="inp-pos">
-        <option value="v.">v. 動詞</option>
-        <option value="adj.">adj. 形容詞</option>
-        <option value="n.">n. 名詞</option>
-        <option value="adv.">adv. 副詞</option>
-        <option value="phr.">phr. 片語</option>
-      </select>
-    </div>
-  </div>
-  <div class="field"><label>中文解釋</label><input type="text" id="inp-zh" placeholder="按「AI 填入」自動生成，或自己輸入" /></div>
-  <div class="field"><label>英文解釋</label><input type="text" id="inp-en" placeholder="English definition" /></div>
-  <div class="field"><label>IELTS 例句</label><textarea id="inp-ex" placeholder="Example sentence in academic context"></textarea></div>
   <div class="field">
-    <label>同義字 synonyms</label>
-    <input type="text" id="inp-syn" placeholder="e.g. expand, multiply, spread — 用逗號分隔" />
-    <div class="field-hint">IELTS 閱讀常用同義替換出題，這些也要一起背</div>
+    <label>輸入單字（一行一個）</label>
+    <textarea id="inp-words" rows="6" placeholder="proliferate&#10;substantial&#10;undermine&#10;..."></textarea>
+    <div class="field-hint">重複的字會自動略過，一次可新增多個</div>
   </div>
-  <div class="field"><label>反義字 antonyms</label><input type="text" id="inp-ant" placeholder="e.g. decline, diminish — 用逗號分隔（沒有可以留空）" /></div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-    <button class="btn" id="btn-ai" onclick="aiGenerate()">✨ AI 填入</button>
-    <button class="btn btn-primary" onclick="addWord()">＋ 加入單字表</button>
+  <button class="btn btn-primary" id="btn-batch" onclick="batchAdd()">✨ AI 補齊並加入單字表</button>
+
+  <div class="batch-progress" id="batch-progress">
+    <div class="batch-progress-bar"><div class="batch-progress-fill" id="batch-fill"></div></div>
+    <div class="batch-status" id="batch-status"></div>
   </div>
-  <div id="add-msg"></div>
+  <div class="batch-result" id="batch-result"></div>
+
   <div class="apikey-section">
     <div class="field" style="margin-bottom:8px;">
-      <label>🔑 Anthropic API Key（用於 AI 填入）</label>
+      <label>🔑 Anthropic API Key（用於 AI 補齊）</label>
       <div class="apikey-row">
         <input class="apikey-input" type="password" id="inp-apikey" placeholder="sk-ant-..." />
         <button class="btn" onclick="saveApiKey()">儲存</button>
@@ -276,7 +271,7 @@ const STREAK_STORE = 'ielts_streak_v1';
 const APIKEY_STORE = 'ielts_apikey_v1';
 const TODAY = new Date().toDateString();
 
-// ── API Key ─────────────────────────────────────────────
+// ── API Key ──────────────────────────────────────────────
 function getApiKey() { return localStorage.getItem(APIKEY_STORE) || ''; }
 function saveApiKey() {
   const key = document.getElementById('inp-apikey').value.trim();
@@ -292,34 +287,34 @@ function setApiKeyStatus(msg, isErr) {
 }
 function initApiKeyUI() {
   const key = getApiKey();
-  setApiKeyStatus(key ? '✓ API Key 已設定' : '尚未設定，AI 填入功能無法使用', !key);
+  setApiKeyStatus(key ? '✓ API Key 已設定' : '尚未設定，AI 補齊功能無法使用', !key);
 }
 
-// ── Streak ──────────────────────────────────────────────
+// ── Streak ───────────────────────────────────────────────
 function loadStreak() {
   try { return JSON.parse(localStorage.getItem(STREAK_STORE)) || {}; } catch(e) { return {}; }
 }
 function saveStreak(s) { try { localStorage.setItem(STREAK_STORE, JSON.stringify(s)); } catch(e) {} }
 function getStreakData() {
   const s = loadStreak();
-  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
   const yStr = yesterday.toDateString();
   if (s.lastDay === TODAY) { /* already updated */ }
-  else if (s.lastDay === yStr) { s.streak = (s.streak||0)+1; s.lastDay=TODAY; s.flipsToday=0; saveStreak(s); }
+  else if (s.lastDay === yStr) { s.streak=(s.streak||0)+1; s.lastDay=TODAY; s.flipsToday=0; saveStreak(s); }
   else { s.streak=1; s.lastDay=TODAY; s.flipsToday=0; saveStreak(s); }
   return s;
 }
 function recordFlip() {
-  const s = loadStreak(); s.flipsToday=(s.flipsToday||0)+1; saveStreak(s); updateStreakUI();
+  const s=loadStreak(); s.flipsToday=(s.flipsToday||0)+1; saveStreak(s); updateStreakUI();
 }
 function updateStreakUI() {
-  const s = loadStreak(); const streak = s.streak||0;
-  document.getElementById('streak-num').textContent = streak;
-  document.getElementById('flips-today').textContent = s.flipsToday||0;
-  document.getElementById('streak-icon').textContent = streak>=7?'🔥':streak>=3?'⚡':'✨';
+  const s=loadStreak(); const streak=s.streak||0;
+  document.getElementById('streak-num').textContent=streak;
+  document.getElementById('flips-today').textContent=s.flipsToday||0;
+  document.getElementById('streak-icon').textContent=streak>=7?'🔥':streak>=3?'⚡':'✨';
 }
 
-// ── Session persistence ─────────────────────────────────
+// ── Session ──────────────────────────────────────────────
 function saveSession() {
   try { localStorage.setItem(SESSION_STORE, JSON.stringify({date:TODAY,queueIds:queue.map(w=>w.id),idx,done})); } catch(e) {}
 }
@@ -328,6 +323,84 @@ function loadSession() {
 }
 function shuffle(arr) {
   const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+
+// ── Batch add ────────────────────────────────────────────
+async function fetchWordData(word) {
+  const apiKey = getApiKey();
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: 'You are an IELTS vocabulary expert. When given a word, respond ONLY with a JSON object (no markdown, no backticks, no extra text) with these exact keys: zh (Chinese meaning, concise ≤8 chars), en (English definition, 1 sentence), ex (IELTS academic example sentence, 20-30 words), syn (array of 2-4 synonyms commonly used in IELTS reading passages), ant (array of 1-3 antonyms, or empty array if none relevant), pos (part of speech: one of v. / adj. / n. / adv. / phr.).',
+      messages: [{ role: 'user', content: word }]
+    })
+  });
+  const data = await res.json();
+  return JSON.parse(data.content?.[0]?.text || '{}');
+}
+
+async function batchAdd() {
+  const apiKey = getApiKey();
+  if (!apiKey) { alert('請先設定 Anthropic API Key'); return; }
+
+  const raw = document.getElementById('inp-words').value;
+  const inputWords = raw.split('\n').map(w=>w.trim()).filter(Boolean);
+  if (!inputWords.length) { alert('請輸入至少一個單字'); return; }
+
+  // Filter duplicates
+  const existing = new Set(words.map(w=>w.word.toLowerCase()));
+  const toAdd = [], skipped = [];
+  inputWords.forEach(w => {
+    if (existing.has(w.toLowerCase())) skipped.push(w);
+    else toAdd.push(w);
+  });
+
+  const btn = document.getElementById('btn-batch');
+  btn.disabled = true;
+  const prog = document.getElementById('batch-progress');
+  const fill = document.getElementById('batch-fill');
+  const status = document.getElementById('batch-status');
+  const result = document.getElementById('batch-result');
+  prog.style.display = 'block';
+  result.innerHTML = '';
+
+  const resultItems = [];
+  skipped.forEach(w => resultItems.push(`<div class="batch-result-item"><span class="batch-skip">⊘</span> ${w} — 已存在，略過</div>`));
+
+  for (let i = 0; i < toAdd.length; i++) {
+    const word = toAdd[i];
+    fill.style.width = Math.round(((i) / toAdd.length) * 100) + '%';
+    status.textContent = `處理中 ${i+1} / ${toAdd.length}：${word}`;
+    try {
+      const d = await fetchWordData(word);
+      words.push({
+        id: getNextId(), word,
+        pos: d.pos || 'n.',
+        zh: d.zh || '', en: d.en || '', ex: d.ex || '',
+        syn: d.syn || [], ant: d.ant || [],
+        status: 'new', next: Date.now()
+      });
+      save();
+      resultItems.push(`<div class="batch-result-item"><span class="batch-ok">✓</span> ${word} — ${d.zh||''}</div>`);
+    } catch(e) {
+      resultItems.push(`<div class="batch-result-item"><span class="batch-err">✗</span> ${word} — 失敗，請手動新增</div>`);
+    }
+    result.innerHTML = resultItems.join('');
+  }
+
+  fill.style.width = '100%';
+  status.textContent = `完成！新增 ${toAdd.length} 個字，略過 ${skipped.length} 個重複`;
+  btn.disabled = false;
+  document.getElementById('inp-words').value = '';
+  updateStats();
 }
 
 const DEFAULTS = [
@@ -389,13 +462,13 @@ function updateStats() {
 }
 
 function initStudy() {
-  flipped = false; getStreakData(); updateStreakUI();
-  const session = loadSession(); const due = getDue();
-  if (session && session.queueIds) {
-    const idMap = Object.fromEntries(words.map(w=>[w.id,w]));
-    const restored = session.queueIds.map(id=>idMap[id]).filter(Boolean);
-    const seen = new Set(session.queueIds);
-    queue = [...restored, ...shuffle(due.filter(w=>!seen.has(w.id)))];
+  flipped=false; getStreakData(); updateStreakUI();
+  const session=loadSession(); const due=getDue();
+  if (session&&session.queueIds) {
+    const idMap=Object.fromEntries(words.map(w=>[w.id,w]));
+    const restored=session.queueIds.map(id=>idMap[id]).filter(Boolean);
+    const seen=new Set(session.queueIds);
+    queue=[...restored,...shuffle(due.filter(w=>!seen.has(w.id)))];
     idx=session.idx; done=session.done;
   } else {
     const pri=(w)=>w.status==='hard'?0:w.status==='new'?1:2;
@@ -469,60 +542,11 @@ function rate(r) {
   updateStats(); showCard();
 }
 
-async function aiGenerate() {
-  const word = document.getElementById('inp-word').value.trim();
-  if (!word) { showMsg('請先輸入單字', true); return; }
-  const btn = document.getElementById('btn-ai');
-  btn.disabled = true; btn.textContent = '生成中…';
-  try {
-    const apiKey = getApiKey();
-    if (!apiKey) { showMsg('請先在下方設定 Anthropic API Key', true); btn.disabled=false; btn.textContent='✨ AI 填入'; return; }
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: 'You are an IELTS vocabulary expert. When given a word, respond ONLY with a JSON object (no markdown, no backticks, no extra text) with these exact keys: zh (Chinese meaning, concise ≤8 chars), en (English definition, 1 sentence), ex (IELTS academic example sentence, 20-30 words), syn (array of 2-4 synonyms commonly used in IELTS reading passages), ant (array of 1-3 antonyms, or empty array if none relevant).',
-        messages: [{ role: 'user', content: word }]
-      })
-    });
-    const data = await res.json();
-    const parsed = JSON.parse(data.content?.[0]?.text || '{}');
-    document.getElementById('inp-zh').value = parsed.zh || '';
-    document.getElementById('inp-en').value = parsed.en || '';
-    document.getElementById('inp-ex').value = parsed.ex || '';
-    document.getElementById('inp-syn').value = (parsed.syn||[]).join(', ');
-    document.getElementById('inp-ant').value = (parsed.ant||[]).join(', ');
-  } catch(e) { showMsg('AI 生成失敗，請手動填入', true); }
-  btn.disabled = false; btn.textContent = '✨ AI 填入';
-}
 
-function parsePills(str) { return str.split(',').map(s=>s.trim()).filter(Boolean); }
 
-function addWord() {
-  const word = document.getElementById('inp-word').value.trim();
-  const pos = document.getElementById('inp-pos').value;
-  const zh = document.getElementById('inp-zh').value.trim();
-  const en = document.getElementById('inp-en').value.trim();
-  const ex = document.getElementById('inp-ex').value.trim();
-  const syn = parsePills(document.getElementById('inp-syn').value);
-  const ant = parsePills(document.getElementById('inp-ant').value);
-  if (!word || !zh) { showMsg('請填寫單字和中文解釋', true); return; }
-  if (words.find(w=>w.word.toLowerCase()===word.toLowerCase())) { showMsg('這個字已經在單字表裡了', true); return; }
-  words.push({ id:getNextId(), word, pos, zh, en, ex, syn, ant, status:'new', next:Date.now() });
-  save();
-  showMsg('✓ 已加入單字表！', false);
-  ['inp-word','inp-zh','inp-en','inp-ex','inp-syn','inp-ant'].forEach(id => document.getElementById(id).value='');
-  updateStats();
-}
 
-function showMsg(text, isErr) {
-  const el = document.getElementById('add-msg');
-  el.textContent = text;
-  el.className = 'msg '+(isErr?'msg-err':'msg-ok');
-  setTimeout(()=>{ el.textContent=''; el.className=''; }, 3000);
-}
+
+
 
 function renderList() {
   const el = document.getElementById('word-list');
