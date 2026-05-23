@@ -6,7 +6,6 @@
 <title>IELTS Vocab</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
-
   :root {
     --ink: #1c1917;
     --paper: #f7f3ee;
@@ -24,9 +23,7 @@
     --orange: #c2410c;
     --orange-bg: #ffedd5;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--paper);
@@ -36,11 +33,8 @@
     max-width: 680px;
     margin: 0 auto;
   }
-
   h1 { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
   .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
-
-
   /* Streak bar */
   .streak-bar {
     display: flex; align-items: center; gap: 12px;
@@ -53,8 +47,6 @@
   .streak-lbl { font-size: 11px; color: var(--muted); margin-top: 1px; }
   .streak-flips { font-size: 12px; color: var(--muted); text-align: right; }
   .streak-flips span { font-weight: 600; color: var(--ink); }
-
-
   /* Preview cards */
   .preview-card {
     background: var(--surface); border: 1px solid var(--border);
@@ -62,13 +54,13 @@
   }
   .preview-word { font-family: 'Lora', serif; font-weight: 600; font-size: 18px; margin-bottom: 2px; }
   .preview-pos { font-size: 11px; background: var(--accent-light); padding: 1px 8px; border-radius: 99px; color: var(--accent); display: inline-block; margin-bottom: 8px; }
+  .preview-original { font-size: 11px; color: var(--muted); margin-left: 6px; }
   .preview-zh { font-size: 15px; font-weight: 500; color: var(--ink); }
   .preview-en { font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
   .preview-ex { font-family: 'Lora', serif; font-size: 13px; font-style: italic; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; margin-top: 8px; }
   .preview-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
   .preview-err { color: var(--red); font-size: 13px; }
   .preview-skip { color: var(--muted); font-size: 13px; font-style: italic; }
-
   /* Batch add */
   .batch-progress { margin-top: 12px; display: none; }
   .batch-progress-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
@@ -80,31 +72,24 @@
   .batch-ok { color: var(--green); }
   .batch-skip { color: var(--muted); }
   .batch-err { color: var(--red); }
-
   /* API key */
   .apikey-section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
   .apikey-row { display: flex; gap: 8px; align-items: center; }
   .apikey-input { flex: 1; padding: 7px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); outline: none; }
   .apikey-input:focus { border-color: var(--accent); }
   .apikey-status { font-size: 11px; margin-top: 5px; color: var(--muted); }
-
   .tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; background: var(--surface); }
   .tab { flex: 1; padding: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; cursor: pointer; color: var(--muted); transition: all 0.15s; }
   .tab.active { background: var(--ink); color: #fff; }
-
   .view { display: none; }
   .view.active { display: block; }
-
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.5rem; }
   .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; text-align: center; }
   .stat-num { font-size: 22px; font-weight: 500; color: var(--ink); }
   .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
   .progress-bar { height: 3px; background: var(--border); border-radius: 99px; margin-bottom: 1.5rem; overflow: hidden; }
   .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s ease; width: 0%; }
-
   .card-area { margin-bottom: 1rem; }
-
   .card-panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -113,25 +98,20 @@
     cursor: pointer;
     min-height: 160px;
   }
-
   .front-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   .card-word { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
   .card-pos { font-size: 12px; background: var(--accent-light); padding: 2px 10px; border-radius: 99px; color: var(--accent); display: inline-block; }
   .flip-hint { font-size: 12px; color: var(--muted); margin-top: 16px; }
-
   .back-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
   .def-zh { font-size: 20px; font-weight: 500; color: var(--ink); }
   .def-en { font-size: 15px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
   .example-text { font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; }
   .divider { height: 1px; background: var(--border); margin: 12px 0; }
-
   .pill-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
   .pill { font-size: 13px; padding: 3px 11px; border-radius: 99px; border: 1px solid; }
   .pill-syn { background: var(--green-bg); color: var(--green); border-color: #86efac; }
   .pill-ant { background: var(--red-bg); color: var(--red); border-color: #fca5a5; }
-
   .action-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
-
   .rating-row { display: none; gap: 8px; margin-bottom: 1.5rem; }
   .rating-row.show { display: flex; }
   .rate-btn { flex: 1; padding: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--surface); color: var(--ink); transition: all 0.15s; }
@@ -141,26 +121,21 @@
   .rate-ok:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
   .rate-easy { color: var(--green); border-color: #86efac; }
   .rate-easy:hover { background: var(--green); color: #fff; border-color: var(--green); }
-
   .done-state { display: none; text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
-
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
   .field input, .field textarea, .field select { width: 100%; padding: 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); outline: none; }
   .field input:focus, .field textarea:focus { border-color: var(--accent); }
   .field textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
   .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-
   .btn { padding: 8px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: transparent; color: var(--ink); transition: all 0.15s; }
   .btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
   .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
   .btn-primary:hover { opacity: 0.85; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
   .msg { font-size: 12px; margin-top: 8px; padding: 6px 10px; border-radius: 6px; }
   .msg-ok { background: var(--green-bg); color: var(--green); }
   .msg-err { background: var(--red-bg); color: var(--red); }
-
   .word-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
   .word-item:last-child { border-bottom: none; }
   .wi-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
@@ -169,24 +144,19 @@
   .wi-def { font-size: 12px; color: var(--muted); margin-top: 1px; }
   .wi-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
   .wi-pill { font-size: 11px; padding: 1px 7px; border-radius: 99px; border: 1px solid; }
-
   .tag { font-size: 10px; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; margin-top: 2px; }
   .tag-new { background: var(--blue-bg); color: var(--blue); }
   .tag-hard { background: var(--red-bg); color: var(--red); }
   .tag-ok { background: var(--accent-light); color: var(--accent); }
   .tag-easy { background: var(--green-bg); color: var(--green); }
-
   .del-btn { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--muted); padding: 0 4px; line-height: 1; flex-shrink: 0; }
   .del-btn:hover { color: var(--red); }
-
- text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
 </style>
 </head>
 <body>
-
 <h1>IELTS Vocab</h1>
 <p class="subtitle" id="sub">你的個人單字本</p>
-
 <!-- Streak Bar -->
 <div class="streak-bar">
   <div class="streak-fire" id="streak-icon">✨</div>
@@ -196,13 +166,11 @@
   </div>
   <div class="streak-flips">今日翻牌<br><span id="flips-today">0</span> 次</div>
 </div>
-
 <div class="tabs">
   <button class="tab active" onclick="switchTab('study')">複習</button>
   <button class="tab" onclick="switchTab('add')">新增</button>
   <button class="tab" onclick="switchTab('list')">單字表</button>
 </div>
-
 <!-- STUDY -->
 <div class="view active" id="view-study">
   <div class="stats">
@@ -212,7 +180,6 @@
   </div>
   <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
   <div class="done-state" id="done-state">✓ All done for today!<br><span style="font-size:12px;margin-top:6px;display:block;">Add more words or come back tomorrow.</span></div>
-
   <div class="card-area" id="card-area">
     <!-- front -->
     <div class="card-panel front-panel" id="panel-front" onclick="flipCard()">
@@ -235,27 +202,23 @@
       </div>
     </div>
   </div>
-
   <div class="action-row" id="action-row">
     <button class="btn" id="flip-btn" style="font-size:12px;padding:5px 14px;" onclick="flipCard()">Reveal →</button>
   </div>
-
   <div class="rating-row" id="rating-row">
     <button class="rate-btn rate-hard" onclick="rate('hard')">😰 還不熟</button>
     <button class="rate-btn rate-ok" onclick="rate('ok')">🤔 大概懂</button>
     <button class="rate-btn rate-easy" onclick="rate('easy')">✓ 記住了</button>
   </div>
 </div>
-
 <!-- ADD -->
 <div class="view" id="view-add">
-
   <!-- Step 1: Input -->
   <div id="add-step1">
     <div class="field">
-      <label>輸入單字（一行一個）</label>
-      <textarea id="inp-words" rows="5" placeholder="proliferate&#10;substantial&#10;undermine&#10;..."></textarea>
-      <div class="field-hint">重複的字會自動略過</div>
+      <label>輸入單字（一行一個，可輸入變化形如 derives、running）</label>
+      <textarea id="inp-words" rows="5" placeholder="proliferate&#10;derives&#10;undermining&#10;..."></textarea>
+      <div class="field-hint">AI 會自動還原為字典原型・重複的字會自動略過</div>
     </div>
     <button class="btn btn-primary" id="btn-generate" onclick="generatePreview()">✨ AI 產出</button>
     <div class="batch-progress" id="batch-progress" style="display:none;">
@@ -263,7 +226,6 @@
       <div class="batch-status" id="batch-status"></div>
     </div>
   </div>
-
   <!-- Step 2: Preview -->
   <div id="add-step2" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -276,22 +238,17 @@
     </div>
     <div id="add-msg" style="margin-top:8px;"></div>
   </div>
-
-
 </div>
-
 <!-- LIST -->
 <div class="view" id="view-list">
   <div id="word-list"></div>
 </div>
-
 <script>
 const STORE = 'ielts_vocab_v3';
 const SESSION_STORE = 'ielts_session_v1';
 const STREAK_STORE = 'ielts_streak_v1';
 const APIKEY_STORE = 'ielts_apikey_v1';
 const TODAY = new Date().toDateString();
-
 // ── API Key ──────────────────────────────────────────────
 function getApiKey() { return localStorage.getItem(APIKEY_STORE) || ''; }
 function saveApiKey() {
@@ -303,6 +260,7 @@ function saveApiKey() {
 }
 function setApiKeyStatus(msg, isErr) {
   const el = document.getElementById('apikey-status');
+  if (!el) return;
   el.textContent = msg;
   el.style.color = isErr ? 'var(--red)' : 'var(--green)';
 }
@@ -310,7 +268,6 @@ function initApiKeyUI() {
   const key = getApiKey();
   setApiKeyStatus(key ? '✓ API Key 已設定' : '尚未設定，AI 補齊功能無法使用', !key);
 }
-
 // ── Streak ───────────────────────────────────────────────
 function loadStreak() {
   try { return JSON.parse(localStorage.getItem(STREAK_STORE)) || {}; } catch(e) { return {}; }
@@ -334,7 +291,6 @@ function updateStreakUI() {
   document.getElementById('flips-today').textContent=s.flipsToday||0;
   document.getElementById('streak-icon').textContent=streak>=7?'🔥':streak>=3?'⚡':'✨';
 }
-
 // ── Session ──────────────────────────────────────────────
 function saveSession() {
   try { localStorage.setItem(SESSION_STORE, JSON.stringify({date:TODAY,queueIds:queue.map(w=>w.id),idx,done})); } catch(e) {}
@@ -345,10 +301,8 @@ function loadSession() {
 function shuffle(arr) {
   const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
 }
-
 // ── Batch add with preview ───────────────────────────────
-let pendingWords = []; // words ready to confirm
-
+let pendingWords = [];
 const PROXY_URL = 'https://ielts-proxy.cytreese.workers.dev';
 
 async function fetchWordData(word) {
@@ -358,7 +312,8 @@ async function fetchWordData(word) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
       max_tokens: 1000,
-      system: 'You are an IELTS vocabulary expert. When given a word, respond ONLY with a JSON object (no markdown, no backticks, no extra text) with these exact keys: zh (Chinese meaning, concise ≤8 chars), en (English definition, 1 sentence), ex (IELTS academic example sentence, 20-30 words), syn (array of 2-4 synonyms commonly used in IELTS reading passages), ant (array of 1-3 antonyms, or empty array if none relevant), pos (part of speech: one of v. / adj. / n. / adv. / phr.).',
+      // ── CHANGE 1: ask AI to (a) return the base/dictionary form and (b) use Taiwan Traditional Chinese ──
+      system: 'You are an IELTS vocabulary expert. The user may give you an inflected word (e.g. "derives", "running", "undermined"). Respond ONLY with a JSON object (no markdown, no backticks, no extra text) with these exact keys: word (the base/dictionary form of the input, e.g. "derive" for "derives", "run" for "running"), zh (繁體中文意思，使用台灣用語，簡潔 ≤8 字), en (English definition, 1 sentence), ex (IELTS academic example sentence using the base form, 20-30 words), syn (array of 2-4 synonyms commonly used in IELTS reading passages), ant (array of 1-3 antonyms, or empty array if none relevant), pos (part of speech: one of v. / adj. / n. / adv. / phr.).',
       messages: [{ role: 'user', content: word }]
     })
   });
@@ -372,12 +327,25 @@ async function fetchWordData(word) {
 }
 
 function renderPreviewCard(item) {
-  if (item.skipped) return `<div class="preview-card"><div class="preview-word">${item.word}</div><div class="preview-skip">已在單字表中，略過</div></div>`;
-  if (item.error) return `<div class="preview-card"><div class="preview-word">${item.word}</div><div class="preview-err">✗ AI 無法產出，將略過</div></div>`;
+  if (item.skipped) {
+    // Show whether it was skipped due to the original input or the normalised base form
+    const skipNote = item.normalizedTo
+      ? `已在單字表中（原型：${item.normalizedTo}），略過`
+      : '已在單字表中，略過';
+    return `<div class="preview-card">
+      <div class="preview-word">${item.inputWord}${item.normalizedTo && item.normalizedTo !== item.inputWord ? ` <span class="preview-original">→ ${item.normalizedTo}</span>` : ''}</div>
+      <div class="preview-skip">${skipNote}</div>
+    </div>`;
+  }
+  if (item.error) return `<div class="preview-card"><div class="preview-word">${item.inputWord}</div><div class="preview-err">✗ AI 無法產出，將略過</div></div>`;
   const synHtml = (item.syn||[]).map(s=>`<span class="pill pill-syn">≈ ${s}</span>`).join('');
   const antHtml = (item.ant||[]).map(a=>`<span class="pill pill-ant">↔ ${a}</span>`).join('');
+  // Show normalisation hint when the base form differs from what the user typed
+  const normHint = (item.word !== item.inputWord)
+    ? `<span class="preview-original">（輸入：${item.inputWord}）</span>`
+    : '';
   return `<div class="preview-card">
-    <div class="preview-word">${item.word} <span class="preview-pos">${item.pos||''}</span></div>
+    <div class="preview-word">${item.word} ${normHint}<span class="preview-pos">${item.pos||''}</span></div>
     <div class="preview-zh">${item.zh||''}</div>
     <div class="preview-en">${item.en||''}</div>
     <div class="preview-ex">"${item.ex||''}"</div>
@@ -391,7 +359,6 @@ async function generatePreview() {
   const raw = document.getElementById('inp-words').value;
   const inputWords = raw.split('\n').map(w=>w.trim()).filter(Boolean);
   if (!inputWords.length) { alert('請輸入至少一個單字'); return; }
-
   const btn = document.getElementById('btn-generate');
   btn.disabled = true;
   const prog = document.getElementById('batch-progress');
@@ -399,32 +366,57 @@ async function generatePreview() {
   const status = document.getElementById('batch-status');
   prog.style.display = 'block';
 
-  const existing = new Set(words.map(w=>w.word.toLowerCase()));
-  pendingWords = [];
+  // ── CHANGE 2: track both original words AND base forms already seen this batch ──
+  const existingInVocab = new Set(words.map(w=>w.word.toLowerCase()));
+  const addedThisBatch = new Set(); // prevent duplicates within the same batch run
 
+  pendingWords = [];
   for (let i = 0; i < inputWords.length; i++) {
-    const word = inputWords[i];
+    const inputWord = inputWords[i];
     fill.style.width = Math.round(((i) / inputWords.length) * 100) + '%';
-    status.textContent = `AI 產出中 ${i+1} / ${inputWords.length}：${word}`;
-    if (existing.has(word.toLowerCase())) {
-      pendingWords.push({ word, skipped: true });
-    } else {
-      try {
-        const d = await fetchWordData(word);
-        pendingWords.push({ word, pos:d.pos||'n.', zh:d.zh||'', en:d.en||'', ex:d.ex||'', syn:d.syn||[], ant:d.ant||[] });
-      } catch(e) {
-        pendingWords.push({ word, error: true });
+    status.textContent = `AI 產出中 ${i+1} / ${inputWords.length}：${inputWord}`;
+
+    // Quick pre-check: if the user typed exactly a word already in vocab, skip without API call
+    if (existingInVocab.has(inputWord.toLowerCase())) {
+      pendingWords.push({ inputWord, word: inputWord, skipped: true });
+      continue;
+    }
+
+    try {
+      const d = await fetchWordData(inputWord);
+      // ── Use the AI-returned base form as the canonical word ──
+      const baseWord = (d.word || inputWord).toLowerCase().trim();
+      const displayWord = d.word || inputWord;
+
+      // Post-fetch duplicate check: base form may already exist in vocab or this batch
+      if (existingInVocab.has(baseWord) || addedThisBatch.has(baseWord)) {
+        pendingWords.push({ inputWord, word: displayWord, normalizedTo: displayWord, skipped: true });
+      } else {
+        addedThisBatch.add(baseWord);
+        pendingWords.push({
+          inputWord,                      // what the user originally typed
+          word: displayWord,              // base / dictionary form from AI
+          pos: d.pos || 'n.',
+          zh: d.zh || '',
+          en: d.en || '',
+          ex: d.ex || '',
+          syn: d.syn || [],
+          ant: d.ant || []
+        });
       }
+    } catch(e) {
+      pendingWords.push({ inputWord, word: inputWord, error: true });
     }
   }
-
   fill.style.width = '100%';
   btn.disabled = false;
   prog.style.display = 'none';
 
   // Show preview
   const validCount = pendingWords.filter(w=>!w.skipped&&!w.error).length;
-  document.getElementById('preview-count').textContent = `${validCount} 個新單字，${pendingWords.filter(w=>w.skipped).length} 個略過`;
+  const skippedCount = pendingWords.filter(w=>w.skipped).length;
+  document.getElementById('preview-count').textContent =
+    `${validCount} 個新單字` + (skippedCount ? `，${skippedCount} 個略過` : '');
   document.getElementById('preview-list').innerHTML = pendingWords.map(renderPreviewCard).join('');
   document.getElementById('add-step1').style.display = 'none';
   document.getElementById('add-step2').style.display = 'block';
@@ -439,7 +431,18 @@ function backToInput() {
 function confirmAdd() {
   const toAdd = pendingWords.filter(w=>!w.skipped&&!w.error);
   toAdd.forEach(item => {
-    words.push({ id:getNextId(), word:item.word, pos:item.pos, zh:item.zh, en:item.en, ex:item.ex, syn:item.syn, ant:item.ant, status:'new', next:Date.now() });
+    words.push({
+      id: getNextId(),
+      word: item.word,       // base form
+      pos: item.pos,
+      zh: item.zh,
+      en: item.en,
+      ex: item.ex,
+      syn: item.syn,
+      ant: item.ant,
+      status: 'new',
+      next: Date.now()
+    });
   });
   save(); updateStats();
   const msg = document.getElementById('add-msg');
@@ -492,7 +495,6 @@ const DEFAULTS = [
 ];
 
 let words = [], queue = [], idx = 0, done = 0, flipped = false;
-
 function load() {
   try {
     const raw = localStorage.getItem(STORE);
@@ -500,17 +502,14 @@ function load() {
     else words = DEFAULTS;
   } catch(e) { words = DEFAULTS; }
 }
-
 function save() { try { localStorage.setItem(STORE, JSON.stringify(words)); } catch(e) {} }
 function getNextId() { return words.length ? Math.max(...words.map(w=>w.id))+1 : 1; }
 function getDue() { return words.filter(w => w.next <= Date.now()); }
-
 function updateStats() {
   document.getElementById('s-total').textContent = words.length;
   document.getElementById('s-due').textContent = getDue().length;
   document.getElementById('s-easy').textContent = words.filter(w=>w.status==='easy').length;
 }
-
 function initStudy() {
   flipped=false; getStreakData(); updateStreakUI();
   const session=loadSession(); const due=getDue();
@@ -527,11 +526,9 @@ function initStudy() {
   }
   updateStats(); showCard();
 }
-
 function showCard() {
   const total = queue.length + done;
   document.getElementById('prog').style.width = total ? Math.round((done/total)*100)+'%' : '0%';
-
   if (idx >= queue.length) {
     document.getElementById('card-area').style.display = 'none';
     document.getElementById('action-row').style.display = 'none';
@@ -540,25 +537,21 @@ function showCard() {
     document.getElementById('prog').style.width = '100%';
     return;
   }
-
   document.getElementById('card-area').style.display = 'block';
   document.getElementById('action-row').style.display = 'flex';
   document.getElementById('done-state').style.display = 'none';
-
   const w = queue[idx];
   document.getElementById('front-word').textContent = w.word;
   document.getElementById('front-pos').textContent = w.pos;
   document.getElementById('back-zh').textContent = w.zh;
   document.getElementById('back-en').textContent = w.en;
   document.getElementById('back-ex').textContent = '"' + w.ex + '"';
-
   const hasPills = (w.syn && w.syn.length) || (w.ant && w.ant.length);
   document.getElementById('syn-block').style.display = hasPills ? 'block' : 'none';
   const pillRow = document.getElementById('back-pills');
   pillRow.innerHTML = '';
   (w.syn||[]).forEach(s => { const p = document.createElement('span'); p.className='pill pill-syn'; p.textContent='≈ '+s; pillRow.appendChild(p); });
   (w.ant||[]).forEach(a => { const p = document.createElement('span'); p.className='pill pill-ant'; p.textContent='↔ '+a; pillRow.appendChild(p); });
-
   document.getElementById('panel-front').style.display = 'flex';
   document.getElementById('panel-back').style.display = 'none';
   document.getElementById('rating-row').classList.remove('show');
@@ -567,7 +560,6 @@ function showCard() {
   fb.disabled = false;
   flipped = false;
 }
-
 function flipCard() {
   if (flipped) return;
   flipped = true;
@@ -579,7 +571,6 @@ function flipCard() {
   fb.textContent = '已翻面';
   fb.disabled = true;
 }
-
 function rate(r) {
   const w = queue[idx];
   const wi = words.findIndex(x => x.id === w.id);
@@ -591,13 +582,6 @@ function rate(r) {
   saveSession();
   updateStats(); showCard();
 }
-
-
-
-
-
-
-
 function renderList() {
   const el = document.getElementById('word-list');
   if (!words.length) { el.innerHTML='<div class="empty">還沒有單字，去「新增」加入吧！</div>'; return; }
@@ -619,13 +603,11 @@ function renderList() {
     </div>`;
   }).join('');
 }
-
 function delWord(id) {
   if (!confirm('確定刪除這個字？')) return;
   words = words.filter(w=>w.id!==id);
   save(); renderList(); updateStats();
 }
-
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['study','add','list'][i]===name));
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -633,7 +615,6 @@ function switchTab(name) {
   if (name==='list') renderList();
   if (name==='study') initStudy();
 }
-
 load();
 initStudy();
 document.getElementById('sub').textContent = `${words.length} 個單字 · ${getDue().length} 個待複習`;
