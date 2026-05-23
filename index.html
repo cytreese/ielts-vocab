@@ -54,6 +54,21 @@
   .streak-flips { font-size: 12px; color: var(--muted); text-align: right; }
   .streak-flips span { font-weight: 600; color: var(--ink); }
 
+
+  /* Preview cards */
+  .preview-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+  }
+  .preview-word { font-family: 'Lora', serif; font-weight: 600; font-size: 18px; margin-bottom: 2px; }
+  .preview-pos { font-size: 11px; background: var(--accent-light); padding: 1px 8px; border-radius: 99px; color: var(--accent); display: inline-block; margin-bottom: 8px; }
+  .preview-zh { font-size: 15px; font-weight: 500; color: var(--ink); }
+  .preview-en { font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
+  .preview-ex { font-family: 'Lora', serif; font-size: 13px; font-style: italic; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; margin-top: 8px; }
+  .preview-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .preview-err { color: var(--red); font-size: 13px; }
+  .preview-skip { color: var(--muted); font-size: 13px; font-style: italic; }
+
   /* Batch add */
   .batch-progress { margin-top: 12px; display: none; }
   .batch-progress-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
@@ -234,18 +249,33 @@
 
 <!-- ADD -->
 <div class="view" id="view-add">
-  <div class="field">
-    <label>輸入單字（一行一個）</label>
-    <textarea id="inp-words" rows="6" placeholder="proliferate&#10;substantial&#10;undermine&#10;..."></textarea>
-    <div class="field-hint">重複的字會自動略過，一次可新增多個</div>
-  </div>
-  <button class="btn btn-primary" id="btn-batch" onclick="batchAdd()">✨ AI 補齊並加入單字表</button>
 
-  <div class="batch-progress" id="batch-progress">
-    <div class="batch-progress-bar"><div class="batch-progress-fill" id="batch-fill"></div></div>
-    <div class="batch-status" id="batch-status"></div>
+  <!-- Step 1: Input -->
+  <div id="add-step1">
+    <div class="field">
+      <label>輸入單字（一行一個）</label>
+      <textarea id="inp-words" rows="5" placeholder="proliferate&#10;substantial&#10;undermine&#10;..."></textarea>
+      <div class="field-hint">重複的字會自動略過</div>
+    </div>
+    <button class="btn btn-primary" id="btn-generate" onclick="generatePreview()">✨ AI 產出</button>
+    <div class="batch-progress" id="batch-progress" style="display:none;">
+      <div class="batch-progress-bar"><div class="batch-progress-fill" id="batch-fill"></div></div>
+      <div class="batch-status" id="batch-status"></div>
+    </div>
   </div>
-  <div class="batch-result" id="batch-result"></div>
+
+  <!-- Step 2: Preview -->
+  <div id="add-step2" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-size:13px;color:var(--muted);" id="preview-count"></span>
+      <button class="btn" onclick="backToInput()" style="font-size:12px;padding:4px 12px;">← 重新輸入</button>
+    </div>
+    <div id="preview-list"></div>
+    <div style="margin-top:1rem;display:flex;gap:8px;">
+      <button class="btn btn-primary" onclick="confirmAdd()" id="btn-confirm">＋ 全部加入單字表</button>
+    </div>
+    <div id="add-msg" style="margin-top:8px;"></div>
+  </div>
 
   <div class="apikey-section">
     <div class="field" style="margin-bottom:8px;">
@@ -325,7 +355,9 @@ function shuffle(arr) {
   const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
 }
 
-// ── Batch add ────────────────────────────────────────────
+// ── Batch add with preview ───────────────────────────────
+let pendingWords = []; // words ready to confirm
+
 async function fetchWordData(word) {
   const apiKey = getApiKey();
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -344,63 +376,95 @@ async function fetchWordData(word) {
     })
   });
   const data = await res.json();
-  return JSON.parse(data.content?.[0]?.text || '{}');
+  console.log('API response for', word, ':', JSON.stringify(data));
+  if (data.error) throw new Error(data.error.message || 'API error');
+  if (!data.content || !data.content[0]) throw new Error('Empty response');
+  const text = data.content[0].text.trim().replace(/^```json|^```|```$/gm, '').trim();
+  const parsed = JSON.parse(text);
+  if (!parsed.zh) throw new Error('Invalid JSON structure');
+  return parsed;
 }
 
-async function batchAdd() {
+function renderPreviewCard(item) {
+  if (item.skipped) return `<div class="preview-card"><div class="preview-word">${item.word}</div><div class="preview-skip">已在單字表中，略過</div></div>`;
+  if (item.error) return `<div class="preview-card"><div class="preview-word">${item.word}</div><div class="preview-err">✗ AI 無法產出，將略過</div></div>`;
+  const synHtml = (item.syn||[]).map(s=>`<span class="pill pill-syn">≈ ${s}</span>`).join('');
+  const antHtml = (item.ant||[]).map(a=>`<span class="pill pill-ant">↔ ${a}</span>`).join('');
+  return `<div class="preview-card">
+    <div class="preview-word">${item.word} <span class="preview-pos">${item.pos||''}</span></div>
+    <div class="preview-zh">${item.zh||''}</div>
+    <div class="preview-en">${item.en||''}</div>
+    <div class="preview-ex">"${item.ex||''}"</div>
+    ${(synHtml||antHtml)?`<div class="preview-pills">${synHtml}${antHtml}</div>`:''}
+  </div>`;
+}
+
+async function generatePreview() {
   const apiKey = getApiKey();
   if (!apiKey) { alert('請先設定 Anthropic API Key'); return; }
-
   const raw = document.getElementById('inp-words').value;
   const inputWords = raw.split('\n').map(w=>w.trim()).filter(Boolean);
   if (!inputWords.length) { alert('請輸入至少一個單字'); return; }
 
-  // Filter duplicates
-  const existing = new Set(words.map(w=>w.word.toLowerCase()));
-  const toAdd = [], skipped = [];
-  inputWords.forEach(w => {
-    if (existing.has(w.toLowerCase())) skipped.push(w);
-    else toAdd.push(w);
-  });
-
-  const btn = document.getElementById('btn-batch');
+  const btn = document.getElementById('btn-generate');
   btn.disabled = true;
   const prog = document.getElementById('batch-progress');
   const fill = document.getElementById('batch-fill');
   const status = document.getElementById('batch-status');
-  const result = document.getElementById('batch-result');
   prog.style.display = 'block';
-  result.innerHTML = '';
 
-  const resultItems = [];
-  skipped.forEach(w => resultItems.push(`<div class="batch-result-item"><span class="batch-skip">⊘</span> ${w} — 已存在，略過</div>`));
+  const existing = new Set(words.map(w=>w.word.toLowerCase()));
+  pendingWords = [];
 
-  for (let i = 0; i < toAdd.length; i++) {
-    const word = toAdd[i];
-    fill.style.width = Math.round(((i) / toAdd.length) * 100) + '%';
-    status.textContent = `處理中 ${i+1} / ${toAdd.length}：${word}`;
-    try {
-      const d = await fetchWordData(word);
-      words.push({
-        id: getNextId(), word,
-        pos: d.pos || 'n.',
-        zh: d.zh || '', en: d.en || '', ex: d.ex || '',
-        syn: d.syn || [], ant: d.ant || [],
-        status: 'new', next: Date.now()
-      });
-      save();
-      resultItems.push(`<div class="batch-result-item"><span class="batch-ok">✓</span> ${word} — ${d.zh||''}</div>`);
-    } catch(e) {
-      resultItems.push(`<div class="batch-result-item"><span class="batch-err">✗</span> ${word} — 失敗，請手動新增</div>`);
+  for (let i = 0; i < inputWords.length; i++) {
+    const word = inputWords[i];
+    fill.style.width = Math.round(((i) / inputWords.length) * 100) + '%';
+    status.textContent = `AI 產出中 ${i+1} / ${inputWords.length}：${word}`;
+    if (existing.has(word.toLowerCase())) {
+      pendingWords.push({ word, skipped: true });
+    } else {
+      try {
+        const d = await fetchWordData(word);
+        pendingWords.push({ word, pos:d.pos||'n.', zh:d.zh||'', en:d.en||'', ex:d.ex||'', syn:d.syn||[], ant:d.ant||[] });
+      } catch(e) {
+        pendingWords.push({ word, error: true });
+      }
     }
-    result.innerHTML = resultItems.join('');
   }
 
   fill.style.width = '100%';
-  status.textContent = `完成！新增 ${toAdd.length} 個字，略過 ${skipped.length} 個重複`;
   btn.disabled = false;
+  prog.style.display = 'none';
+
+  // Show preview
+  const validCount = pendingWords.filter(w=>!w.skipped&&!w.error).length;
+  document.getElementById('preview-count').textContent = `${validCount} 個新單字，${pendingWords.filter(w=>w.skipped).length} 個略過`;
+  document.getElementById('preview-list').innerHTML = pendingWords.map(renderPreviewCard).join('');
+  document.getElementById('add-step1').style.display = 'none';
+  document.getElementById('add-step2').style.display = 'block';
+}
+
+function backToInput() {
+  document.getElementById('add-step1').style.display = 'block';
+  document.getElementById('add-step2').style.display = 'none';
+  pendingWords = [];
+}
+
+function confirmAdd() {
+  const toAdd = pendingWords.filter(w=>!w.skipped&&!w.error);
+  toAdd.forEach(item => {
+    words.push({ id:getNextId(), word:item.word, pos:item.pos, zh:item.zh, en:item.en, ex:item.ex, syn:item.syn, ant:item.ant, status:'new', next:Date.now() });
+  });
+  save(); updateStats();
+  const msg = document.getElementById('add-msg');
+  msg.textContent = `✓ 已加入 ${toAdd.length} 個單字！`;
+  msg.style.color = 'var(--green)';
   document.getElementById('inp-words').value = '';
-  updateStats();
+  pendingWords = [];
+  setTimeout(() => {
+    backToInput();
+    msg.textContent = '';
+  }, 1500);
 }
 
 const DEFAULTS = [
