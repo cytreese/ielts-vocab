@@ -161,20 +161,20 @@
 </head>
 <body>
 <h1>IELTS Vocab</h1>
-<p class="subtitle" id="sub">你的個人單字本</p>
+<p class="subtitle" id="sub">Your personal vocabulary list</p>
 <!-- Streak Bar -->
 <div class="streak-bar">
   <div class="streak-fire" id="streak-icon">✨</div>
   <div class="streak-info">
-    <div class="streak-num" id="streak-num">0</span> Days</div>
-    <div class="streak-lbl">🔥Streak🔥</div>
+    <div class="streak-num" id="streak-num">0</div>
+    <div class="streak-lbl">day streak</div>
   </div>
-  <div class="streak-flips">Flips<br><span id="flips-today">0</span> Times</div>
+  <div class="streak-flips">flips today<br><span id="flips-today">0</span></div>
 </div>
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('study')">複習</button>
+  <button class="tab active" onclick="switchTab('study')">Review</button>
   <button class="tab" onclick="switchTab('add')">Add</button>
-  <button class="tab" onclick="switchTab('list')">單字表</button>
+  <button class="tab" onclick="switchTab('list')">Word List</button>
 </div>
 <!-- STUDY -->
 <div class="view active" id="view-study">
@@ -194,15 +194,15 @@
     </div>
     <!-- back -->
     <div class="card-panel" id="panel-back" style="display:none; cursor:default;">
-      <div class="back-label">意思</div>
+      <div class="back-label">Meaning</div>
       <div class="def-zh" id="back-zh"></div>
       <div class="def-en" id="back-en"></div>
       <div class="divider"></div>
-      <div class="back-label">例句</div>
+      <div class="back-label">Example</div>
       <div class="example-text" id="back-ex"></div>
       <div id="syn-block">
         <div class="divider"></div>
-        <div class="back-label">同義字 <span style="color:var(--green);">syn</span> · 反義字 <span style="color:var(--red);">ant</span></div>
+        <div class="back-label"><span style="color:var(--green);">syn</span> · <span style="color:var(--red);">ant</span></div>
         <div class="pill-row" id="back-pills"></div>
       </div>
     </div>
@@ -211,9 +211,9 @@
     <button class="btn" id="flip-btn" style="font-size:12px;padding:5px 14px;" onclick="flipCard()">Reveal →</button>
   </div>
   <div class="rating-row" id="rating-row">
-    <button class="rate-btn rate-hard" onclick="rate('hard')">😰 還不熟</button>
-    <button class="rate-btn rate-ok" onclick="rate('ok')">🤔 大概懂</button>
-    <button class="rate-btn rate-easy" onclick="rate('easy')">✓ 記住了</button>
+    <button class="rate-btn rate-hard" onclick="rate('hard')">😰 Hard</button>
+    <button class="rate-btn rate-ok" onclick="rate('ok')">🤔 So-so</button>
+    <button class="rate-btn rate-easy" onclick="rate('easy')">✓ Got it</button>
   </div>
 </div>
 <!-- ADD -->
@@ -221,11 +221,11 @@
   <!-- Step 1: Input -->
   <div id="add-step1">
     <div class="field">
-      <label>輸入單字（一行一個，可輸入變化形如 derives、running）</label>
+      <label>Enter words — one per line (inflected forms like "derives" or "running" are fine)</label>
       <textarea id="inp-words" rows="5" placeholder="proliferate&#10;derives&#10;undermining&#10;..."></textarea>
-      <div class="field-hint">AI 會自動還原為字典原型・重複的字會自動略過</div>
+      <div class="field-hint">AI will restore each word to its base form · duplicates are skipped automatically</div>
     </div>
-    <button class="btn btn-primary" id="btn-generate" onclick="generatePreview()">✨ AI Generate</button>
+    <button class="btn btn-primary" id="btn-generate" onclick="generatePreview()">✨ Generate</button>
     <div class="batch-progress" id="batch-progress" style="display:none;">
       <div class="batch-progress-bar"><div class="batch-progress-fill" id="batch-fill"></div></div>
       <div class="batch-status" id="batch-status"></div>
@@ -235,17 +235,22 @@
   <div id="add-step2" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <span style="font-size:13px;color:var(--muted);" id="preview-count"></span>
-      <button class="btn" onclick="backToInput()" style="font-size:12px;padding:4px 12px;">← 重新輸入</button>
+      <button class="btn" onclick="backToInput()" style="font-size:12px;padding:4px 12px;">← Back</button>
     </div>
     <div id="preview-list"></div>
     <div style="margin-top:1rem;display:flex;gap:8px;">
-      <button class="btn btn-primary" onclick="confirmAdd()" id="btn-confirm">＋ 全部加入單字表</button>
+      <button class="btn btn-primary" onclick="confirmAdd()" id="btn-confirm">＋ Add all to word list</button>
     </div>
     <div id="add-msg" style="margin-top:8px;"></div>
   </div>
 </div>
 <!-- LIST -->
 <div class="view" id="view-list">
+  <div style="display:flex;gap:8px;margin-bottom:1rem;">
+    <button class="btn" onclick="exportJSON()" style="font-size:12px;">💾 Save JSON</button>
+    <button class="btn" onclick="document.getElementById('inp-import').click()" style="font-size:12px;">📂 Load JSON</button>
+    <input type="file" id="inp-import" accept=".json" style="display:none;" onchange="importJSON(event)">
+  </div>
   <div id="word-list"></div>
 </div>
 <script>
@@ -334,18 +339,18 @@ async function fetchWordData(word) {
 function renderPreviewCard(item, idx) {
   if (item.skipped) {
     const skipNote = item.normalizedTo
-      ? `已在單字表中（原型：${item.normalizedTo}），略過`
-      : '已在單字表中，略過';
+      ? `Already in word list (base form: ${item.normalizedTo}) — skipped`
+      : 'Already in word list — skipped';
     return `<div class="preview-card">
       <div class="preview-word">${item.inputWord}${item.normalizedTo && item.normalizedTo !== item.inputWord ? ` <span class="preview-original">→ ${item.normalizedTo}</span>` : ''}</div>
       <div class="preview-skip">${skipNote}</div>
     </div>`;
   }
-  if (item.error) return `<div class="preview-card"><div class="preview-word">${item.inputWord}</div><div class="preview-err">✗ AI 無法產出，將略過</div></div>`;
+  if (item.error) return `<div class="preview-card"><div class="preview-word">${item.inputWord}</div><div class="preview-err">✗ Could not generate — skipped</div></div>`;
   const synHtml = (item.syn||[]).map(s=>`<span class="pill pill-syn">≈ ${s}</span>`).join('');
   const antHtml = (item.ant||[]).map(a=>`<span class="pill pill-ant">↔ ${a}</span>`).join('');
   const normHint = (item.word !== item.inputWord)
-    ? `<span class="preview-original">（輸入：${item.inputWord}）</span>`
+    ? `<span class="preview-original">(input: ${item.inputWord})</span>`
     : '';
   return `<div class="preview-card">
     <div class="preview-word">
@@ -361,7 +366,7 @@ function renderPreviewCard(item, idx) {
     <div class="preview-en">${item.en||''}</div>
     <div class="preview-ex">"${item.ex||''}"</div>
     ${(synHtml||antHtml)?`<div class="preview-pills">${synHtml}${antHtml}</div>`:''}
-    <div class="edit-hint">✏️ 點擊單字或中文翻譯可直接修改</div>
+    <div class="edit-hint">✏️ Tap the word or Chinese meaning to edit</div>
   </div>`;
 }
 
@@ -374,7 +379,7 @@ async function generatePreview() {
   if (!apiKey) { alert('請先設定 Anthropic API Key'); return; }
   const raw = document.getElementById('inp-words').value;
   const inputWords = raw.split('\n').map(w=>w.trim()).filter(Boolean);
-  if (!inputWords.length) { alert('請輸入至少一個單字'); return; }
+  if (!inputWords.length) { alert('Please enter at least one word.'); return; }
   const btn = document.getElementById('btn-generate');
   btn.disabled = true;
   const prog = document.getElementById('batch-progress');
@@ -390,7 +395,7 @@ async function generatePreview() {
   for (let i = 0; i < inputWords.length; i++) {
     const inputWord = inputWords[i];
     fill.style.width = Math.round(((i) / inputWords.length) * 100) + '%';
-    status.textContent = `AI Generating ${i+1} / ${inputWords.length}：${inputWord}`;
+    status.textContent = `Generating ${i+1} / ${inputWords.length}: ${inputWord}`;
 
     // Quick pre-check: if the user typed exactly a word already in vocab, skip without API call
     if (existingInVocab.has(inputWord.toLowerCase())) {
@@ -432,7 +437,7 @@ async function generatePreview() {
   const validCount = pendingWords.filter(w=>!w.skipped&&!w.error).length;
   const skippedCount = pendingWords.filter(w=>w.skipped).length;
   document.getElementById('preview-count').textContent =
-    `${validCount} 個新單字` + (skippedCount ? `，${skippedCount} 個略過` : '');
+    `${validCount} new word${validCount !== 1 ? 's' : ''}` + (skippedCount ? `, ${skippedCount} skipped` : '');
   document.getElementById('preview-list').innerHTML = pendingWords.map((item, i) => renderPreviewCard(item, i)).join('');
   document.getElementById('add-step1').style.display = 'none';
   document.getElementById('add-step2').style.display = 'block';
@@ -462,7 +467,7 @@ function confirmAdd() {
   });
   save(); updateStats();
   const msg = document.getElementById('add-msg');
-  msg.textContent = `✓ 已加入 ${toAdd.length} 個單字！`;
+  msg.textContent = `✓ Added ${toAdd.length} word${toAdd.length !== 1 ? 's' : ''}!`;
   msg.style.color = 'var(--green)';
   document.getElementById('inp-words').value = '';
   pendingWords = [];
@@ -473,41 +478,12 @@ function confirmAdd() {
 }
 
 const DEFAULTS = [
-  { id:1, word:'citing', pos:'v.', zh:'引用；列舉', en:'referring to something as evidence or justification', ex:'The researcher challenged the theory, citing several contradictory studies published in the past decade.', syn:['referencing','quoting','invoking'], ant:[], status:'new', next:Date.now() },
-  { id:2, word:'skeptical', pos:'adj.', zh:'持懷疑態度的', en:'not easily convinced; having doubts about something', ex:'Many economists remain skeptical about the long-term effectiveness of quantitative easing as a monetary policy tool.', syn:['doubtful','dubious','unconvinced'], ant:['credulous','convinced'], status:'new', next:Date.now() },
-  { id:3, word:'proliferate', pos:'v.', zh:'迅速增長；擴散', en:'to increase rapidly in number or amount', ex:'Social media platforms have proliferated rapidly, fundamentally altering how political information is consumed and shared.', syn:['multiply','expand','surge','spread'], ant:['decline','diminish','dwindle'], status:'new', next:Date.now() },
-  { id:4, word:'substantial', pos:'adj.', zh:'大量的；可觀的', en:'of considerable importance, size, or worth', ex:'There is substantial evidence to suggest that early intervention programmes improve long-term educational outcomes.', syn:['considerable','significant','extensive','sizeable'], ant:['negligible','minimal','trivial'], status:'new', next:Date.now() },
-  { id:5, word:'mutually exclusive', pos:'phr.', zh:'互相排斥的', en:'describing two things that cannot both be true or exist at the same time', ex:'Economic growth and environmental sustainability are not mutually exclusive goals, provided that appropriate policies are implemented.', syn:['incompatible','contradictory','irreconcilable'], ant:['compatible','complementary'], status:'new', next:Date.now() },
-  { id:6, word:'ill-equipped', pos:'adj.', zh:'準備不足的', en:'lacking the necessary skills, resources, or qualities to deal with something', ex:'Critics argue that many school leavers are ill-equipped for the demands of a rapidly changing labour market.', syn:['unprepared','unqualified','inadequate'], ant:['well-prepared','qualified','capable'], status:'new', next:Date.now() },
-  { id:7, word:'vocational', pos:'adj.', zh:'職業導向的', en:'relating to skills or qualifications needed for a particular job or career', ex:'Governments increasingly recognise that vocational training programmes can reduce youth unemployment more effectively than traditional academic routes.', syn:['occupational','technical','professional'], ant:['academic','theoretical'], status:'new', next:Date.now() },
-  { id:8, word:'undermine', pos:'v.', zh:'削弱；破壞', en:'to weaken or damage something gradually, especially an authority or belief', ex:'Widespread corruption can undermine public trust in democratic institutions and impede long-term economic development.', syn:['weaken','erode','compromise','subvert'], ant:['strengthen','bolster','reinforce'], status:'new', next:Date.now() },
-  { id:9, word:'inherently', pos:'adv.', zh:'本質上；天生地', en:'in a permanent, essential, or characteristic way', ex:'Some philosophers argue that human beings are inherently social creatures who cannot thrive in prolonged isolation.', syn:['fundamentally','intrinsically','essentially'], ant:['artificially','superficially'], status:'new', next:Date.now() },
-  { id:10, word:'embark on', pos:'phr.', zh:'開始；著手進行', en:'to begin a new project, journey, or course of action', ex:'Many developing nations are embarking on ambitious infrastructure programmes in order to attract foreign investment and stimulate economic growth.', syn:['undertake','commence','initiate'], ant:['abandon','conclude','cease'], status:'new', next:Date.now() },
-  { id:11, word:'consistent', pos:'adj.', zh:'一致的；持續的', en:'acting or done in the same way over time, or compatible with other facts or principles', ex:'Research indicates that consistent application of evidence-based teaching methods leads to measurably better student outcomes across diverse school settings.', syn:['steady','uniform','constant','coherent'], ant:['inconsistent','erratic','contradictory'], status:'new', next:Date.now() },
-  { id:12, word:'compromise', pos:'n./v.', zh:'妥協；折衷（方案）', en:'an agreement reached by each side making concessions, or to accept something less than ideal', ex:'Effective governance often requires politicians to compromise on certain policy details in order to build the broad coalitions necessary for legislative reform.', syn:['concession','middle ground','negotiate','settle'], ant:['deadlock','stand firm','refuse'], status:'new', next:Date.now() },
-  { id:13, word:'annotation', pos:'n.', zh:'注釋；標注', en:'a note added to a text or diagram to explain or comment on it', ex:'Scholars have long debated the authenticity of certain annotations found in the margins of the original manuscript, which may have been added by a later hand.', syn:['note','commentary','footnote','gloss'], ant:[], status:'new', next:Date.now() },
-  { id:14, word:'secularized', pos:'adj.', zh:'世俗化的', en:'having been converted from religious to non-religious character or use', ex:'As societies have become increasingly secularized, traditional religious institutions have had to adapt their role in public life.', syn:['non-religious','lay','temporal'], ant:['religious','sacred','spiritual'], status:'new', next:Date.now() },
-  { id:15, word:'census', pos:'n.', zh:'人口普查', en:'an official count or survey of a population, typically recording details of individuals', ex:'According to the most recent census, the proportion of elderly citizens has risen sharply, placing greater pressure on public pension systems.', syn:['survey','count','enumeration'], ant:[], status:'new', next:Date.now() },
-  { id:16, word:'coveted', pos:'adj.', zh:'令人垂涎的；夢寐以求的', en:'greatly desired or envied by others', ex:'A place at a top-ranked university remains one of the most coveted achievements among school leavers in many competitive societies.', syn:['desired','sought-after','prized','enviable'], ant:['undesirable','unwanted'], status:'new', next:Date.now() },
-  { id:17, word:'underlie', pos:'v.', zh:'構成…的基礎；潛藏於', en:'to be the cause or basis of something', ex:'A shared commitment to democratic values is said to underlie the foreign policy decisions of many Western governments.', syn:['form the basis of','underpin','drive','inform'], ant:[], status:'new', next:Date.now() },
-  { id:18, word:'profound', pos:'adj.', zh:'深刻的；深遠的', en:'having great depth, intensity, or far-reaching effects', ex:'The Industrial Revolution had a profound impact on social structures, fundamentally reshaping the relationship between labour and capital.', syn:['deep','far-reaching','significant','intense'], ant:['superficial','trivial','shallow'], status:'new', next:Date.now() },
-  { id:19, word:'surrender', pos:'v./n.', zh:'放棄；投降', en:'to give up something or yield to the power of another', ex:'Critics argue that excessive reliance on international aid may cause governments to surrender control over their own economic policy-making.', syn:['yield','relinquish','concede','give up'], ant:['resist','retain','hold on'], status:'new', next:Date.now() },
-  { id:20, word:'restore', pos:'v.', zh:'恢復；重建', en:'to bring back or return something to a former condition or position', ex:'Policymakers face the challenge of restoring public confidence in financial institutions following the banking crisis.', syn:['reinstate','revive','rehabilitate','rebuild'], ant:['destroy','undermine','abolish'], status:'new', next:Date.now() },
-  { id:21, word:'fraction', pos:'n.', zh:'一小部分；分數', en:'a small part or proportion of something', ex:'Only a fraction of the funding allocated to renewable energy research is directed towards solar technology in developing regions.', syn:['portion','fragment','small part','segment'], ant:['whole','entirety','majority'], status:'new', next:Date.now() },
-  { id:22, word:'abundant', pos:'adj.', zh:'豐富的；充裕的', en:'existing or available in large quantities', ex:'The region is abundant in natural resources, yet persistent inequality suggests that wealth is not being equitably distributed among the population.', syn:['plentiful','ample','copious','rich in'], ant:['scarce','limited','deficient'], status:'new', next:Date.now() },
-  { id:23, word:'deterioration', pos:'n.', zh:'惡化；退化', en:'the process of becoming progressively worse', ex:'Prolonged exposure to air pollution has been linked to the deterioration of respiratory health in urban populations worldwide.', syn:['decline','degradation','worsening','decay'], ant:['improvement','recovery','enhancement'], status:'new', next:Date.now() },
-  { id:24, word:'arise', pos:'v.', zh:'出現；產生', en:'to emerge or occur, especially as a result of something', ex:'Ethical dilemmas frequently arise when scientific advancement outpaces the development of appropriate regulatory frameworks.', syn:['emerge','occur','develop','come about'], ant:['disappear','cease','resolve'], status:'new', next:Date.now() },
-  { id:25, word:'promptly', pos:'adv.', zh:'迅速地；立即地', en:'with little or no delay; immediately', ex:'Governments that respond promptly to early warning signs of economic instability are generally better positioned to avert financial crises.', syn:['immediately','swiftly','without delay','rapidly'], ant:['slowly','belatedly','eventually'], status:'new', next:Date.now() },
-  { id:26, word:'confined', pos:'adj.', zh:'受限的；侷限的', en:'restricted to a particular place, situation, or group', ex:'Access to high-quality legal representation should not be confined to those with substantial financial means.', syn:['restricted','limited','contained','bound'], ant:['unrestricted','open','widespread'], status:'new', next:Date.now() },
-  { id:27, word:'rollout', pos:'n.', zh:'推出；部署', en:'the staged introduction or launch of a new product, service, or policy', ex:'The rollout of the national vaccination programme was hampered by logistical challenges and uneven distribution of resources across regions.', syn:['launch','introduction','deployment','implementation'], ant:['withdrawal','cancellation'], status:'new', next:Date.now() },
-  { id:28, word:'caught in the middle', pos:'phr.', zh:'夾在中間；左右為難', en:'placed in a difficult position between two opposing sides or demands', ex:'Small nations are frequently caught in the middle of geopolitical rivalries between major powers, forcing difficult diplomatic trade-offs.', syn:['torn between','stuck between','caught between two sides'], ant:[], status:'new', next:Date.now() },
-  { id:29, word:'impunity', pos:'n.', zh:'免受懲罰；不受法律制裁', en:'exemption from punishment or freedom from the injurious consequences of an action', ex:'Human rights organisations have warned that powerful corporations operating with impunity in conflict zones must be held accountable under international law.', syn:['exemption','immunity','freedom from punishment'], ant:['accountability','liability','consequence'], status:'new', next:Date.now() },
-  { id:30, word:'aftermath', pos:'n.', zh:'後果；餘波', en:'the consequences or after-effects of a significant, often unpleasant, event', ex:'In the aftermath of the financial crisis, governments worldwide implemented sweeping regulatory reforms to prevent a recurrence of systemic failure.', syn:['consequences','repercussions','fallout','after-effects'], ant:['prelude','cause','origin'], status:'new', next:Date.now() },
-  { id:31, word:'pawning', pos:'v.', zh:'典當；抵押', en:'depositing an object with a pawnbroker as security for a loan', ex:'Rising levels of household debt have led to an increase in the number of individuals pawning personal valuables in order to meet immediate financial obligations.', syn:['pledging','mortgaging','hocking'], ant:['redeeming','reclaiming'], status:'new', next:Date.now() },
-  { id:32, word:'sentiments', pos:'n.', zh:'情感；看法；情緒', en:'feelings or opinions, especially those expressed publicly', ex:'Public sentiments towards immigration policy have shifted considerably in response to changing economic conditions and media coverage.', syn:['feelings','views','opinions','attitudes'], ant:[], status:'new', next:Date.now() },
-  { id:33, word:'romanticize', pos:'v.', zh:'浪漫化；美化', en:'to think about or describe something as being better or more appealing than it really is', ex:'It is tempting to romanticize pre-industrial societies, yet historical evidence suggests that poverty and disease were far more prevalent than modern nostalgia implies.', syn:['idealise','glamorise','glorify'], ant:['disparage','demystify'], status:'new', next:Date.now() },
-  { id:34, word:'bygone', pos:'adj.', zh:'過去的；往昔的', en:'belonging to an earlier time; past', ex:'Many politicians invoke a bygone era of national unity, though historians caution against oversimplifying the complexities of the past.', syn:['past','former','olden','previous'], ant:['current','present','modern'], status:'new', next:Date.now() },
-  { id:35, word:'assimilation', pos:'n.', zh:'同化；融入', en:'the process by which a person or group adopts the culture and norms of a larger society', ex:'Debates over cultural assimilation raise fundamental questions about the extent to which immigrant communities should be expected to abandon their heritage.', syn:['integration','absorption','acculturation'], ant:['segregation','exclusion','preservation'], status:'new', next:Date.now() },
+  { id:1, word:'proliferate', pos:'v.', zh:'迅速增長；擴散', en:'to increase rapidly in number or amount', ex:'Social media platforms have proliferated rapidly, fundamentally altering how political information is consumed and shared.', syn:['multiply','expand','surge','spread'], ant:['decline','diminish','dwindle'], status:'new', next:Date.now() },
+  { id:2, word:'substantial', pos:'adj.', zh:'大量的；可觀的', en:'of considerable importance, size, or worth', ex:'There is substantial evidence to suggest that early intervention programmes improve long-term educational outcomes.', syn:['considerable','significant','extensive','sizeable'], ant:['negligible','minimal','trivial'], status:'new', next:Date.now() },
+  { id:3, word:'undermine', pos:'v.', zh:'削弱；破壞', en:'to weaken or damage something gradually, especially an authority or belief', ex:'Widespread corruption can undermine public trust in democratic institutions and impede long-term economic development.', syn:['weaken','erode','compromise','subvert'], ant:['strengthen','bolster','reinforce'], status:'new', next:Date.now() },
+  { id:4, word:'inherently', pos:'adv.', zh:'本質上；天生地', en:'in a permanent, essential, or characteristic way', ex:'Some philosophers argue that human beings are inherently social creatures who cannot thrive in prolonged isolation.', syn:['fundamentally','intrinsically','essentially'], ant:['artificially','superficially'], status:'new', next:Date.now() },
+  { id:5, word:'profound', pos:'adj.', zh:'深刻的；深遠的', en:'having great depth, intensity, or far-reaching effects', ex:'The Industrial Revolution had a profound impact on social structures, fundamentally reshaping the relationship between labour and capital.', syn:['deep','far-reaching','significant','intense'], ant:['superficial','trivial','shallow'], status:'new', next:Date.now() },
+  { id:6, word:'aftermath', pos:'n.', zh:'後果；餘波', en:'the consequences or after-effects of a significant, often unpleasant, event', ex:'In the aftermath of the financial crisis, governments worldwide implemented sweeping regulatory reforms to prevent a recurrence of systemic failure.', syn:['consequences','repercussions','fallout','after-effects'], ant:['prelude','cause','origin'], status:'new', next:Date.now() },
 ];
 
 let words = [], queue = [], idx = 0, done = 0, flipped = false;
@@ -584,7 +560,7 @@ function flipCard() {
   document.getElementById('panel-back').style.display = 'block';
   document.getElementById('rating-row').classList.add('show');
   const fb = document.getElementById('flip-btn');
-  fb.textContent = '已翻面';
+  fb.textContent = 'Revealed';
   fb.disabled = true;
 }
 function rate(r) {
@@ -600,7 +576,7 @@ function rate(r) {
 }
 function renderList() {
   const el = document.getElementById('word-list');
-  if (!words.length) { el.innerHTML='<div class="empty">還沒有單字，去「新增」加入吧！</div>'; return; }
+  if (!words.length) { el.innerHTML='<div class="empty">No words yet — go to Add to get started!</div>'; return; }
   const tagMap = { new:['tag-new','new'], hard:['tag-hard','hard'], ok:['tag-ok','ok'], easy:['tag-easy','easy'] };
   el.innerHTML = words.map(w => {
     const [cls, lbl] = tagMap[w.status] || tagMap.new;
@@ -620,9 +596,53 @@ function renderList() {
   }).join('');
 }
 function delWord(id) {
-  if (!confirm('確定刪除這個字？')) return;
+  if (!confirm('Delete this word?')) return;
   words = words.filter(w=>w.id!==id);
   save(); renderList(); updateStats();
+}
+// ── JSON 匯出 / 匯入 ─────────────────────────────────────
+function exportJSON() {
+  const data = JSON.stringify(words, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10); // e.g. 2026-05-30
+  a.href = url;
+  a.download = `ielts-words-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error('格式錯誤');
+      // 合併：以 word 為 key，匯入的字若已存在則略過
+      const existing = new Set(words.map(w => w.word.toLowerCase()));
+      let added = 0;
+      imported.forEach(w => {
+        if (!w.word) return;
+        if (existing.has(w.word.toLowerCase())) return;
+        w.id = getNextId();
+        if (!w.syn) w.syn = [];
+        if (!w.ant) w.ant = [];
+        if (!w.status) w.status = 'new';
+        if (!w.next) w.next = Date.now();
+        words.push(w);
+        existing.add(w.word.toLowerCase());
+        added++;
+      });
+      save(); renderList(); updateStats();
+      alert(`✓ Loaded ${added} new word${added !== 1 ? 's' : ''} (duplicates skipped)`);
+    } catch(err) {
+      alert('Import failed — please make sure the file is a valid JSON.');
+    }
+    event.target.value = ''; // reset so same file can be re-imported
+  };
+  reader.readAsText(file);
 }
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['study','add','list'][i]===name));
@@ -633,7 +653,7 @@ function switchTab(name) {
 }
 load();
 initStudy();
-document.getElementById('sub').textContent = `${words.length} 個單字 · ${getDue().length} 個待複習`;
+document.getElementById('sub').textContent = `${words.length} words · ${getDue().length} due today`;
 </script>
 </body>
 </html>
