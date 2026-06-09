@@ -190,7 +190,16 @@
     <div class="card-panel front-panel" id="panel-front" onclick="flipCard()">
       <div class="card-word" id="front-word"></div>
       <div class="card-pos" id="front-pos"></div>
-      <div class="flip-hint">tap to reveal →</div>
+      <div class="flip-hint">tap to see example →</div>
+    </div>
+    <!-- example -->
+    <div class="card-panel" id="panel-example" style="display:none; cursor:pointer;" onclick="flipCard()">
+      <div style="text-align:center; margin-bottom:16px;">
+        <div class="card-word" id="ex-word"></div>
+        <div class="card-pos" id="ex-pos"></div>
+      </div>
+      <div class="example-text" id="ex-text"></div>
+      <div class="flip-hint" style="margin-top:16px; text-align:center;">tap to reveal translation →</div>
     </div>
     <!-- back -->
     <div class="card-panel" id="panel-back" style="display:none; cursor:default;">
@@ -250,6 +259,10 @@
     <button class="btn" onclick="exportJSON()" style="font-size:12px;">💾 Save JSON</button>
     <button class="btn" onclick="document.getElementById('inp-import').click()" style="font-size:12px;">📂 Load JSON</button>
     <input type="file" id="inp-import" accept=".json" style="display:none;" onchange="importJSON(event)">
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:1rem;">
+    <button class="btn btn-primary" id="sort-newest" onclick="setSort('newest')" style="font-size:12px;">Newest</button>
+    <button class="btn" id="sort-az" onclick="setSort('az')" style="font-size:12px;">A–Z</button>
   </div>
   <div id="word-list"></div>
 </div>
@@ -486,7 +499,7 @@ const DEFAULTS = [
   { id:6, word:'aftermath', pos:'n.', zh:'後果；餘波', en:'the consequences or after-effects of a significant, often unpleasant, event', ex:'In the aftermath of the financial crisis, governments worldwide implemented sweeping regulatory reforms to prevent a recurrence of systemic failure.', syn:['consequences','repercussions','fallout','after-effects'], ant:['prelude','cause','origin'], status:'new', next:Date.now() },
 ];
 
-let words = [], queue = [], idx = 0, done = 0, flipped = false;
+let words = [], queue = [], idx = 0, done = 0, cardState = 'front';
 function load() {
   try {
     const raw = localStorage.getItem(STORE);
@@ -503,7 +516,7 @@ function updateStats() {
   document.getElementById('s-easy').textContent = words.filter(w=>w.status==='easy').length;
 }
 function initStudy() {
-  flipped=false; getStreakData(); updateStreakUI();
+  cardState='front'; getStreakData(); updateStreakUI();
   const session=loadSession(); const due=getDue();
   if (session&&session.queueIds) {
     const idMap=Object.fromEntries(words.map(w=>[w.id,w]));
@@ -537,6 +550,9 @@ function showCard() {
   document.getElementById('front-pos').textContent = w.pos;
   document.getElementById('back-zh').textContent = w.zh;
   document.getElementById('back-en').textContent = w.en;
+  document.getElementById('ex-word').textContent = w.word;
+  document.getElementById('ex-pos').textContent = w.pos;
+  document.getElementById('ex-text').textContent = '"' + w.ex + '"';
   document.getElementById('back-ex').textContent = '"' + w.ex + '"';
   const hasPills = (w.syn && w.syn.length) || (w.ant && w.ant.length);
   document.getElementById('syn-block').style.display = hasPills ? 'block' : 'none';
@@ -545,23 +561,32 @@ function showCard() {
   (w.syn||[]).forEach(s => { const p = document.createElement('span'); p.className='pill pill-syn'; p.textContent='≈ '+s; pillRow.appendChild(p); });
   (w.ant||[]).forEach(a => { const p = document.createElement('span'); p.className='pill pill-ant'; p.textContent='↔ '+a; pillRow.appendChild(p); });
   document.getElementById('panel-front').style.display = 'flex';
+  document.getElementById('panel-example').style.display = 'none';
   document.getElementById('panel-back').style.display = 'none';
   document.getElementById('rating-row').classList.remove('show');
   const fb = document.getElementById('flip-btn');
-  fb.textContent = 'Reveal →';
+  fb.textContent = 'Show Example →';
   fb.disabled = false;
-  flipped = false;
+  cardState = 'front';
 }
 function flipCard() {
-  if (flipped) return;
-  flipped = true;
-  recordFlip();
-  document.getElementById('panel-front').style.display = 'none';
-  document.getElementById('panel-back').style.display = 'block';
-  document.getElementById('rating-row').classList.add('show');
-  const fb = document.getElementById('flip-btn');
-  fb.textContent = 'Revealed';
-  fb.disabled = true;
+  if (cardState === 'front') {
+    cardState = 'example';
+    recordFlip();
+    document.getElementById('panel-front').style.display = 'none';
+    document.getElementById('panel-example').style.display = 'block';
+    const fb = document.getElementById('flip-btn');
+    fb.textContent = 'Reveal Translation →';
+    fb.disabled = false;
+  } else if (cardState === 'example') {
+    cardState = 'back';
+    document.getElementById('panel-example').style.display = 'none';
+    document.getElementById('panel-back').style.display = 'block';
+    document.getElementById('rating-row').classList.add('show');
+    const fb = document.getElementById('flip-btn');
+    fb.textContent = 'Revealed';
+    fb.disabled = true;
+  }
 }
 function rate(r) {
   const w = queue[idx];
@@ -574,11 +599,19 @@ function rate(r) {
   saveSession();
   updateStats(); showCard();
 }
+let sortMode = 'newest';
+function setSort(mode) {
+  sortMode = mode;
+  document.getElementById('sort-newest').classList.toggle('btn-primary', mode==='newest');
+  document.getElementById('sort-az').classList.toggle('btn-primary', mode==='az');
+  renderList();
+}
 function renderList() {
   const el = document.getElementById('word-list');
   if (!words.length) { el.innerHTML='<div class="empty">No words yet — go to Add to get started!</div>'; return; }
   const tagMap = { new:['tag-new','new'], hard:['tag-hard','hard'], ok:['tag-ok','ok'], easy:['tag-easy','easy'] };
-  el.innerHTML = words.map(w => {
+  const sorted = [...words].sort((a,b) => sortMode==='az' ? a.word.localeCompare(b.word) : b.id-a.id);
+  el.innerHTML = sorted.map(w => {
     const [cls, lbl] = tagMap[w.status] || tagMap.new;
     const synHtml = (w.syn||[]).map(s=>`<span class="wi-pill pill-syn" style="background:var(--green-bg);color:var(--green);border-color:#86efac;">≈ ${s}</span>`).join('');
     const antHtml = (w.ant||[]).map(a=>`<span class="wi-pill pill-ant" style="background:var(--red-bg);color:var(--red);border-color:#fca5a5;">↔ ${a}</span>`).join('');
